@@ -828,10 +828,21 @@ async function storeFile(id, file, { kinds, max = 80 * 1024 * 1024 }) {
   return true;
 }
 
+let fitFrame = 0;
+let lastPreviewWidth = -1;
 function fitPreview() {
-  const scale = previewScale.clientWidth / 1280;
-  preview.style.transform = `scale(${scale})`;
-  previewScale.style.height = `${800 * scale}px`;
+  // Se aplaza al siguiente frame y solo actúa si cambió el ancho: así cambiar la
+  // altura no vuelve a disparar el ResizeObserver en el mismo ciclo
+  // ("ResizeObserver loop completed with undelivered notifications").
+  cancelAnimationFrame(fitFrame);
+  fitFrame = requestAnimationFrame(() => {
+    const width = previewScale.clientWidth;
+    if (width === lastPreviewWidth) return;
+    lastPreviewWidth = width;
+    const scale = width / 1280;
+    preview.style.transform = `scale(${scale})`;
+    previewScale.style.height = `${800 * scale}px`;
+  });
 }
 
 function ask(title, body, okLabel) {

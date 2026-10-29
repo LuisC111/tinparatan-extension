@@ -421,7 +421,11 @@ function bind() {
     if (settingsRef.background.type === "video" && motionAllowed(settingsRef)) video.play().catch(() => {});
     startClock();
   });
-  new ResizeObserver(() => fx.resize()).observe(document.getElementById("bg"));
+  let resizeFrame = 0;
+  new ResizeObserver(() => {
+    cancelAnimationFrame(resizeFrame);
+    resizeFrame = requestAnimationFrame(() => fx.resize());
+  }).observe(document.getElementById("bg"));
   const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
   motionQuery.addEventListener?.("change", () => {
     if (settingsRef.motion === "system") apply(settingsRef);

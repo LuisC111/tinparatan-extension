@@ -32,6 +32,7 @@
           <button type="button" data-goto="busqueda" data-i18n="nav.search">Búsqueda</button>
           <button type="button" data-goto="accesos" data-i18n="nav.shortcuts">Accesos</button>
           <button type="button" data-goto="widgets" data-i18n="nav.widgets">Widgets</button>
+          <button type="button" data-goto="reloj" data-i18n="nav.clock">Reloj y fecha</button>
           <button type="button" data-goto="tema-navegador" data-i18n="nav.browserTheme">Tema del navegador</button>
           <button type="button" data-goto="fijadas" data-i18n="nav.pinned">Pestañas fijadas</button>
           <button type="button" data-goto="avanzado" data-i18n="nav.advanced">Avanzado</button>
@@ -172,6 +173,23 @@
                 <input type="text" maxlength="32" data-bind="profile.name" id="profile-name" autocomplete="nickname" data-i18n-placeholder="profile.namePlaceholder">
               </label>
               <label class="check"><input type="checkbox" data-bind="profile.greet"><span data-i18n="profile.greet"></span></label>
+              <div class="profile-greet" id="profile-greet-opts">
+                <label class="field">
+                  <span data-i18n="profile.greetText"></span>
+                  <input type="text" maxlength="40" data-bind="profile.greetText" id="profile-greet-text" data-i18n-placeholder="profile.greetTextPlaceholder">
+                  <span class="hint" data-i18n="profile.greetTextHint"></span>
+                </label>
+                <label class="check"><input type="checkbox" data-bind="profile.greetGradient"><span data-i18n="profile.greetGradient"></span></label>
+              </div>
+              <label class="field">
+                <span data-i18n="profile.placement"></span>
+                <select data-bind="profile.placement" id="profile-placement">
+                  <option value="above-logo" data-i18n="profile.placements.above-logo"></option>
+                  <option value="between" data-i18n="profile.placements.between"></option>
+                  <option value="below-wordmark" data-i18n="profile.placements.below-wordmark"></option>
+                  <option value="below-search" data-i18n="profile.placements.below-search"></option>
+                </select>
+              </label>
               <label class="field">
                 <span class="field-head"><span data-i18n="profile.size"></span><span class="val" data-val="profile.size" data-suffix="px"></span></span>
                 <input type="range" min="16" max="56" step="1" data-bind="profile.size" data-kind="number">
@@ -205,7 +223,7 @@
                 <span class="pc-handle" id="pc-handle"></span>
                 <div class="pc-divider"></div>
                 <span class="pc-label" data-i18n="profile.cardLabel"></span>
-                <span class="pc-hello" id="pc-hello"></span>
+                <span class="pc-hello"><span class="hello-pre" id="pc-greet"></span> <span id="pc-hello"></span></span>
               </div>
             </div>
           </div>
@@ -354,6 +372,15 @@
                 <label><input type="radio" name="search-style" value="square" data-bind="search.style" data-visual="1"><span data-i18n="fields.styleSquare"></span></label>
               </div>
             </div>
+            <div class="field">
+              <span data-i18n="fields.searchAlign"></span>
+              <div class="segmented">
+                <label><input type="radio" name="search-align" value="left" data-bind="search.align"><span data-i18n="fields.alignTextLeft"></span></label>
+                <label><input type="radio" name="search-align" value="center" data-bind="search.align"><span data-i18n="fields.alignTextCenter"></span></label>
+                <label><input type="radio" name="search-align" value="right" data-bind="search.align"><span data-i18n="fields.alignTextRight"></span></label>
+              </div>
+              <span class="hint" data-i18n="fields.searchAlignHint"></span>
+            </div>
             <label class="field">
               <span class="field-head"><span data-i18n="fields.searchWidth"></span><span class="val" data-val="search.width" data-suffix="px"></span></span>
               <input type="range" min="280" max="820" step="10" data-bind="search.width" data-kind="number" data-visual="1">
@@ -387,24 +414,6 @@
           <h2 data-i18n="sections.widgets.title"></h2>
           <p class="lede" data-i18n="sections.widgets.desc"></p>
           <div class="card">
-            <h3 data-i18n="fields.clock"></h3>
-            <label class="check"><input type="checkbox" data-bind="widgets.clock.enabled"><span data-i18n="fields.enabled"></span></label>
-            <label class="check"><input type="checkbox" data-bind="widgets.clock.format24"><span data-i18n="fields.format24"></span></label>
-            <label class="check"><input type="checkbox" data-bind="widgets.clock.seconds"><span data-i18n="fields.seconds"></span></label>
-            <label class="field"><span data-i18n="fields.position"></span><select data-bind="widgets.clock.position" data-positions></select></label>
-          </div>
-          <div class="card">
-            <h3 data-i18n="fields.date"></h3>
-            <label class="check"><input type="checkbox" data-bind="widgets.date.enabled"><span data-i18n="fields.enabled"></span></label>
-            <label class="field"><span data-i18n="fields.position"></span><select data-bind="widgets.date.position" data-positions></select></label>
-          </div>
-          <div class="card">
-            <h3 data-i18n="fields.greeting"></h3>
-            <label class="check"><input type="checkbox" data-bind="widgets.greeting.enabled"><span data-i18n="fields.enabled"></span></label>
-            <label class="field"><span data-i18n="fields.yourName"></span><input type="text" maxlength="40" data-bind="widgets.greeting.name"><span class="hint" data-i18n="fields.nameHint"></span></label>
-            <label class="field"><span data-i18n="fields.position"></span><select data-bind="widgets.greeting.position" data-positions></select></label>
-          </div>
-          <div class="card">
             <h3 data-i18n="fields.notes"></h3>
             <label class="check"><input type="checkbox" data-bind="widgets.notes.enabled"><span data-i18n="fields.enabled"></span></label>
             <label class="field"><span data-i18n="fields.position"></span><select data-bind="widgets.notes.position" data-positions></select></label>
@@ -416,6 +425,128 @@
           </div>
         </section>
 
+        <section class="section" id="reloj">
+          <h2 data-i18n="sections.clock.title"></h2>
+          <p class="lede" data-i18n="sections.clock.desc"></p>
+          <div class="clock-stage" aria-live="off">
+            <span class="clock-stage-label" data-i18n="clock.preview"></span>
+            <p class="clock" id="cp-clock"></p>
+            <p class="date" id="cp-date"></p>
+          </div>
+          <div class="segmented ts-tabs" role="tablist">
+            <label><input type="radio" name="ts-tab" value="clock" checked><span data-i18n="clock.clockTab"></span></label>
+            <label><input type="radio" name="ts-tab" value="date"><span data-i18n="clock.dateTab"></span></label>
+          </div>
+          <div class="card ts-pane" data-ts-pane="clock">
+            <label class="check"><input type="checkbox" data-bind="widgets.clock.enabled"><span data-i18n="fields.enabled"></span></label>
+            <label class="field"><span data-i18n="fields.position"></span><select data-bind="widgets.clock.position" data-positions></select></label>
+            <div class="grid-2 ts-top">
+              <div class="field">
+                <span data-i18n="clock.hourFormat"></span>
+                <div class="segmented">
+                  <label><input type="radio" name="clock-h" value="true" data-bind="widgets.clock.format24" data-kind="bool"><span data-i18n="clock.format24"></span></label>
+                  <label><input type="radio" name="clock-h" value="false" data-bind="widgets.clock.format24" data-kind="bool"><span data-i18n="clock.format12"></span></label>
+                </div>
+              </div>
+              <div class="field" id="clock-ampm-field">
+                <span data-i18n="clock.ampm"></span>
+                <div class="segmented">
+                  <label><input type="radio" name="clock-ampm" value="full" data-bind="widgets.clock.ampm"><span data-i18n="clock.ampmFull"></span></label>
+                  <label><input type="radio" name="clock-ampm" value="short" data-bind="widgets.clock.ampm"><span data-i18n="clock.ampmShort"></span></label>
+                  <label><input type="radio" name="clock-ampm" value="hidden" data-bind="widgets.clock.ampm"><span data-i18n="clock.ampmHidden"></span></label>
+                </div>
+                <span class="hint" data-i18n="clock.ampmHint"></span>
+              </div>
+            </div>
+            <label class="check"><input type="checkbox" data-bind="widgets.clock.seconds"><span data-i18n="fields.seconds"></span></label>
+            <div class="ts-style">
+              <div class="grid-2">
+                <label class="field">
+                  <span class="field-head"><span data-i18n="clock.size"></span><span class="val" data-val="widgets.clock.style.size" data-suffix="px"></span></span>
+                  <input type="range" min="14" max="160" step="1" data-bind="widgets.clock.style.size" data-kind="number">
+                </label>
+                <label class="field">
+                  <span class="field-head"><span data-i18n="clock.weight"></span><span class="val" data-val="widgets.clock.style.weight"></span></span>
+                  <input type="range" min="100" max="900" step="100" data-bind="widgets.clock.style.weight" data-kind="number">
+                </label>
+                <label class="field">
+                  <span class="field-head"><span data-i18n="clock.letterSpacing"></span><span class="val" data-val="widgets.clock.style.letterSpacing" data-suffix="em"></span></span>
+                  <input type="range" min="-0.1" max="0.4" step="0.01" data-bind="widgets.clock.style.letterSpacing" data-kind="number">
+                </label>
+                <label class="field">
+                  <span class="field-head"><span data-i18n="clock.opacity"></span><span class="val" data-val="widgets.clock.style.opacity" data-suffix="%"></span></span>
+                  <input type="range" min="20" max="100" step="1" data-bind="widgets.clock.style.opacity" data-kind="number">
+                </label>
+              </div>
+              <div class="field">
+                <span data-i18n="clock.font"></span>
+                <div class="font-tiles ts-fonts" data-ts-fonts="clock" role="radiogroup" data-i18n-aria="clock.font"></div>
+              </div>
+              <div class="field">
+                <span data-i18n="clock.effect"></span>
+                <div class="effect-tiles ts-effects" data-ts-effects="clock" role="radiogroup" data-i18n-aria="clock.effect"></div>
+                <span class="hint" data-ts-time-hint="clock" data-i18n="clock.timeHint"></span>
+              </div>
+              <div class="field" data-ts-colors="clock">
+                <span data-i18n="clock.colors"></span>
+                <div class="color-row">
+                  <label class="color-pick"><input type="color" data-ts-color="clock" data-index="0"><span data-i18n="clock.color1"></span></label>
+                  <label class="color-pick" data-ts-c2="clock"><input type="color" data-ts-color="clock" data-index="1"><span data-i18n="clock.color2"></span></label>
+                </div>
+              </div>
+              <div class="ts-actions"><button type="button" class="btn" data-ts-reset="clock" data-i18n="clock.reset"></button></div>
+            </div>
+          </div>
+          <div class="card ts-pane" data-ts-pane="date" hidden>
+            <label class="check"><input type="checkbox" data-bind="widgets.date.enabled"><span data-i18n="fields.enabled"></span></label>
+            <label class="field"><span data-i18n="fields.position"></span><select data-bind="widgets.date.position" data-positions></select></label>
+            <div class="grid-2">
+              <label class="field"><span data-i18n="clock.format"></span><select data-bind="widgets.date.format" id="date-format">
+                <option value="long"></option><option value="plain"></option><option value="full"></option><option value="numeric"></option><option value="short"></option>
+              </select></label>
+              <label class="field"><span data-i18n="clock.case"></span><select data-bind="widgets.date.case" id="date-case">
+                <option value="title" data-i18n="clock.cases.title"></option><option value="sentence" data-i18n="clock.cases.sentence"></option><option value="lower" data-i18n="clock.cases.lower"></option><option value="upper" data-i18n="clock.cases.upper"></option>
+              </select><span class="hint" id="date-case-hint" data-i18n="clock.caseHint" hidden></span></label>
+            </div>
+            <div class="ts-style">
+              <div class="grid-2">
+                <label class="field">
+                  <span class="field-head"><span data-i18n="clock.size"></span><span class="val" data-val="widgets.date.style.size" data-suffix="px"></span></span>
+                  <input type="range" min="9" max="64" step="1" data-bind="widgets.date.style.size" data-kind="number">
+                </label>
+                <label class="field">
+                  <span class="field-head"><span data-i18n="clock.weight"></span><span class="val" data-val="widgets.date.style.weight"></span></span>
+                  <input type="range" min="100" max="900" step="100" data-bind="widgets.date.style.weight" data-kind="number">
+                </label>
+                <label class="field">
+                  <span class="field-head"><span data-i18n="clock.letterSpacing"></span><span class="val" data-val="widgets.date.style.letterSpacing" data-suffix="em"></span></span>
+                  <input type="range" min="-0.1" max="0.4" step="0.01" data-bind="widgets.date.style.letterSpacing" data-kind="number">
+                </label>
+                <label class="field">
+                  <span class="field-head"><span data-i18n="clock.opacity"></span><span class="val" data-val="widgets.date.style.opacity" data-suffix="%"></span></span>
+                  <input type="range" min="20" max="100" step="1" data-bind="widgets.date.style.opacity" data-kind="number">
+                </label>
+              </div>
+              <div class="field">
+                <span data-i18n="clock.font"></span>
+                <div class="font-tiles ts-fonts" data-ts-fonts="date" role="radiogroup" data-i18n-aria="clock.font"></div>
+              </div>
+              <div class="field">
+                <span data-i18n="clock.effect"></span>
+                <div class="effect-tiles ts-effects" data-ts-effects="date" role="radiogroup" data-i18n-aria="clock.effect"></div>
+                <span class="hint" data-ts-time-hint="date" data-i18n="clock.timeHint"></span>
+              </div>
+              <div class="field" data-ts-colors="date">
+                <span data-i18n="clock.colors"></span>
+                <div class="color-row">
+                  <label class="color-pick"><input type="color" data-ts-color="date" data-index="0"><span data-i18n="clock.color1"></span></label>
+                  <label class="color-pick" data-ts-c2="date"><input type="color" data-ts-color="date" data-index="1"><span data-i18n="clock.color2"></span></label>
+                </div>
+              </div>
+              <div class="ts-actions"><button type="button" class="btn" data-ts-reset="date" data-i18n="clock.reset"></button></div>
+            </div>
+          </div>
+        </section>
         <section class="section" id="tema-navegador">
           <h2 data-i18n="sections.browserTheme.title"></h2>
           <p class="lede" data-i18n="sections.browserTheme.desc"></p>

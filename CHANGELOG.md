@@ -2,6 +2,31 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versiones según [SemVer](https://semver.org/lang/es/).
 
+## [1.3.0] - 2026-10-28
+
+### Añadido
+
+- Saludo según la hora antes del nombre: Buena madrugada, Buenos días, Buen mediodía, Buenas tardes o Buenas noches. Se actualiza solo, sin recargar. Opción de **Saludo fijo** para escribir el tuyo.
+- **Degradado según la hora** en el saludo (activado por defecto): siete fases (madrugada, amanecer, mañana, mediodía, tarde, atardecer, noche) con un movimiento lento y transición suave entre fases. Quieto con `prefers-reduced-motion` o Animaciones desactivadas.
+- **Ubicación del saludo**: sobre el logo, entre logo y wordmark (por defecto), debajo del wordmark o debajo de la búsqueda.
+- Sección **Reloj y fecha** en los ajustes, con vista previa en vivo. Cada uno por separado: tamaño, fuente (las del nombre o la del tema), grosor, efecto (Del tema, Sólido, Degradado, Neón, Caricatura, Pop, Gomita, Prism o **Según la hora**), colores, espaciado entre letras y opacidad.
+- Reloj: 24 h o 12 h, segundos e indicador a. m./p. m. completo («p. m.»), corto («pm») u oculto.
+- Fecha: formatos «Miércoles, 28 De Octubre», «miércoles 28 de octubre», con año, «28/10/2026» y «Mié 28 Oct», y mayúsculas (Cada Palabra, Solo la primera, minúsculas, MAYÚSCULAS).
+- **Alineación del texto** de la búsqueda: izquierda (por defecto), centro o derecha.
+
+### Cambiado
+
+- El saludo es más grande: un 74 % del tamaño del nombre, alineado a la misma línea base.
+- Se quitó el widget de saludo de arriba. El reloj y la fecha siguen igual. Ajustes en versión 3: el nombre del widget viejo pasa al perfil.
+- Con el texto centrado o a la derecha no se muestra el completado en gris (Tab lo sigue aceptando).
+- Todos los controles de la búsqueda (sugerencias y la «x» para borrar) usan el cursor de mano.
+
+## [1.2.1] - 2026-10-28
+
+### Corregido
+
+- La vista previa de los ajustes se ajusta con `ResizeObserver` sin bucles.
+
 ## [1.2.0] - 2026-10-28
 
 ### Añadido

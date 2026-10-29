@@ -1,3 +1,14 @@
+import {
+  CLOCK_STYLE_DEFAULTS,
+  DATE_FORMATS,
+  DATE_STYLE_DEFAULTS,
+  TEXT_EFFECTS,
+  TEXT_FONTS,
+  formatClock,
+  formatDate,
+  paintTextStyle,
+} from "../lib/clockstyle.js";
+import { greetingKey, greetingPhase, greetingPrefix } from "../lib/greeting.js";
 import { parseBackup, buildBackup } from "../lib/backup.js";
 import { BUNDLED_THEMES, themeColors, themeManifest } from "../lib/browser-theme.js";
 import { applyI18n, setLocale, t } from "../lib/i18n.js";
@@ -37,7 +48,10 @@ function setStatus(key) {
 
 function readControl(el) {
   if (el.type === "checkbox") return el.checked;
-  if (el.type === "radio") return el.checked ? el.value : undefined;
+  if (el.type === "radio") {
+    if (!el.checked) return undefined;
+    return el.dataset.kind === "bool" ? el.value === "true" : el.value;
+  }
   if (el.dataset.kind === "number") return Number(el.value);
   return el.value;
 }
@@ -63,6 +77,8 @@ function fill() {
   applyI18n();
   styleFontOptions();
   renderProfile();
+  renderClockTiles();
+  renderClockStyle();
 }
 
 /* ---------- Display name (Discord-style) ---------- */
@@ -157,18 +173,23 @@ function renderProfile() {
   paintProfile(preview, { ...profile, size: Math.min(profile.size, 34) });
   preview.classList.toggle("is-placeholder", !profile.name.trim());
   document.getElementById("pc-handle").textContent = (profile.name.trim() || "tinparatan").toLowerCase().replace(/\s+/g, "_");
-  document.getElementById("pc-hello").textContent = profile.greet
-    ? `${t("profile.hello")}, ${profile.name.trim() || "…"}`
-    : profile.name.trim() || "…";
+  const phase = greetingPhase(new Date());
+  const greet = document.getElementById("pc-greet");
+  greet.hidden = !profile.greet;
+  greet.textContent = greetingPrefix(profile.greetText.trim() || t(greetingKey(phase)), true);
+  greet.dataset.phase = phase;
+  greet.classList.toggle("is-timed", profile.greetGradient);
+  document.getElementById("pc-hello").textContent = profile.name.trim() || "…";
+  document.getElementById("profile-greet-opts").hidden = !profile.greet;
   document.getElementById("pc-banner").style.background = `linear-gradient(135deg, ${profile.colors[0]}, ${profile.colors[1]})`;
 
-  for (const button of document.querySelectorAll(".font-tile")) {
+  for (const button of document.querySelectorAll("#profile-fonts .font-tile")) {
     const on = button.dataset.font === profile.fontId;
     button.setAttribute("aria-checked", on ? "true" : "false");
     button.classList.toggle("is-active", on);
     button.querySelector("b").style.color = on ? profile.colors[0] : "";
   }
-  for (const button of document.querySelectorAll(".effect-tile")) {
+  for (const button of document.querySelectorAll("#profile-effects .effect-tile")) {
     const on = button.dataset.effectId === profile.effect;
     button.setAttribute("aria-checked", on ? "true" : "false");
     button.classList.toggle("is-active", on);
@@ -184,6 +205,152 @@ function renderProfile() {
   document.getElementById("profile-color-field").hidden = effect.colors === 0;
   document.getElementById("profile-c2-wrap").hidden = effect.colors < 2;
   document.getElementById("profile-prism-hint").hidden = effect.colors !== 0;
+}
+
+/* ---------- Reloj y fecha ---------- */
+
+const TS_SAMPLE = { clock: "12", date: "Mié" };
+const TS_BASE_FAMILY = { clock: "var(--font-mono)", date: "" };
+const tsStyle = (target) => state.settings.widgets[target].style;
+const tsEffectColors = (effect) =>
+  effect === "plain" || effect === "time" ? 0 : (PROFILE_EFFECTS.find((entry) => entry.id === effect)?.colors ?? 1);
+const tsEffectLabel = (effect) =>
+  effect === "plain" ? t("clock.effectPlain") : effect === "time" ? t("clock.effectTime") : t(`profile.effects.${effect}`);
+
+function updateClockStyle(target, patch) {
+  const widget = state.settings.widgets[target];
+  widget.style = { ...widget.style, ...patch };
+  scheduleSave();
+}
+
+function renderClockTiles() {
+  for (const box of document.querySelectorAll("[data-ts-fonts]")) {
+    const target = box.dataset.tsFonts;
+    box.replaceChildren(
+      ...TEXT_FONTS.map((font) => {
+        const label = font.id === "default" ? t("clock.fontDefault") : font.label;
+        const button = tile("font-tile", { pressed: false, label, onPick: () => {
+            // Bundled fonts ship one weight: start from it (the slider can still move it).
+            const base = target === "clock" ? CLOCK_STYLE_DEFAULTS : DATE_STYLE_DEFAULTS;
+            updateClockStyle(target, { fontId: font.id, weight: font.weight || base.weight });
+            fill();
+          },
+        });
+        button.dataset.font = font.id;
+        const sample = document.createElement("b");
+        sample.textContent = TS_SAMPLE[target];
+        sample.style.fontFamily = font.family || TS_BASE_FAMILY[target] || "inherit";
+        sample.style.fontWeight = String(font.weight || (target === "clock" ? 500 : 400));
+        if (font.id === "press-start") sample.style.fontSize = "15px";
+        const name = document.createElement("small");
+        name.textContent = label;
+        button.append(sample, name);
+        return button;
+      }),
+    );
+  }
+  for (const box of document.querySelectorAll("[data-ts-effects]")) {
+    const target = box.dataset.tsEffects;
+    box.replaceChildren(
+      ...TEXT_EFFECTS.map((effect) => {
+        const button = tile("effect-tile", {
+          pressed: false,
+          label: tsEffectLabel(effect),
+          onPick: () => updateClockStyle(target, { effect }),
+        });
+        button.dataset.effectId = effect;
+        const sample = document.createElement("span");
+        sample.className = "ts-sample";
+        sample.textContent = TS_SAMPLE[target];
+        const name = document.createElement("small");
+        name.textContent = tsEffectLabel(effect);
+        button.append(sample, name);
+        return button;
+      }),
+    );
+  }
+}
+
+function renderClockStyle() {
+  const now = new Date();
+  const locale = state.settings.locale === "en" ? "en" : "es";
+  const phase = greetingPhase(now);
+  const { clock, date } = state.settings.widgets;
+  const clockEl = document.getElementById("cp-clock");
+  const { time, period } = formatClock(now, clock, locale);
+  const small = document.createElement("span");
+  small.className = "clock-ampm";
+  small.textContent = period;
+  clockEl.replaceChildren(time, ...(period ? [small] : []));
+  document.getElementById("cp-date").textContent = formatDate(now, date.format, date.case, locale);
+  paintTextStyle(clockEl, clock.style, { baseFamily: TS_BASE_FAMILY.clock, phase });
+  paintTextStyle(document.getElementById("cp-date"), date.style, { baseFamily: TS_BASE_FAMILY.date, phase });
+  document.getElementById("clock-ampm-field").classList.toggle("is-off", clock.format24);
+  // Date format options read as live samples of today in the chosen capitalization.
+  const formatSelect = document.getElementById("date-format");
+  if (document.activeElement !== formatSelect) for (const option of formatSelect.options) {
+    if (DATE_FORMATS.includes(option.value)) option.textContent = formatDate(now, option.value, date.case, locale);
+  }
+  document.getElementById("date-case").disabled = date.format === "numeric";
+  document.getElementById("date-case-hint").hidden = date.format !== "numeric";
+
+  for (const target of ["clock", "date"]) {
+    const style = tsStyle(target);
+    for (const button of document.querySelectorAll(`[data-ts-fonts="${target}"] .font-tile`)) {
+      const on = button.dataset.font === style.fontId;
+      button.setAttribute("aria-checked", on ? "true" : "false");
+      button.classList.toggle("is-active", on);
+    }
+    for (const button of document.querySelectorAll(`[data-ts-effects="${target}"] .effect-tile`)) {
+      const on = button.dataset.effectId === style.effect;
+      button.setAttribute("aria-checked", on ? "true" : "false");
+      button.classList.toggle("is-active", on);
+      const sample = button.querySelector(".ts-sample");
+      paintTextStyle(sample, { ...style, effect: button.dataset.effectId, size: 22, opacity: 100, letterSpacing: 0 }, {
+        baseFamily: TS_BASE_FAMILY[target],
+        phase,
+      });
+    }
+    const colors = tsEffectColors(style.effect);
+    document.querySelector(`[data-ts-colors="${target}"]`).hidden = colors === 0;
+    document.querySelector(`[data-ts-c2="${target}"]`).hidden = colors < 2;
+    document.querySelector(`[data-ts-time-hint="${target}"]`).hidden = style.effect !== "time";
+    for (const input of document.querySelectorAll(`[data-ts-color="${target}"]`)) {
+      if (document.activeElement !== input) input.value = style.colors[Number(input.dataset.index)];
+    }
+  }
+}
+
+function bindClockStyle() {
+  for (const input of document.querySelectorAll("[data-ts-color]")) {
+    input.addEventListener("input", () => {
+      const target = input.dataset.tsColor;
+      const colors = [...tsStyle(target).colors];
+      colors[Number(input.dataset.index)] = input.value;
+      const patch = { colors };
+      // Picking a color while on "Del tema" means "use this color".
+      if (tsStyle(target).effect === "plain") patch.effect = "solid";
+      updateClockStyle(target, patch);
+    });
+  }
+  for (const button of document.querySelectorAll("[data-ts-reset]")) {
+    button.addEventListener("click", () => {
+      const target = button.dataset.tsReset;
+      const defaults = target === "clock" ? CLOCK_STYLE_DEFAULTS : DATE_STYLE_DEFAULTS;
+      state.settings.widgets[target].style = structuredClone(defaults);
+      fill();
+      scheduleSave();
+    });
+  }
+  for (const radio of document.querySelectorAll('input[name="ts-tab"]')) {
+    radio.addEventListener("change", () => {
+      for (const pane of document.querySelectorAll("[data-ts-pane]")) pane.hidden = pane.dataset.tsPane !== radio.value;
+    });
+  }
+  // Keep the preview clock ticking while the section is open.
+  setInterval(() => {
+    if (!document.hidden) renderClockStyle();
+  }, 1000);
 }
 
 function bindProfile() {
@@ -772,6 +939,7 @@ function scheduleSave() {
   updateConditional();
   refreshVals();
   renderProfile();
+  renderClockStyle();
   setStatus("options.saving");
   clearTimeout(saveTimer);
   saveRevision += 1;
@@ -876,6 +1044,7 @@ function bind() {
   document.body.addEventListener("input", (event) => onControl(event.target.closest("[data-bind]"), event));
   document.body.addEventListener("change", (event) => onControl(event.target.closest("[data-bind]"), event));
   bindProfile();
+  bindClockStyle();
   document.querySelectorAll(".nav button").forEach((button) => {
     button.addEventListener("click", () => {
       document.getElementById(button.dataset.goto)?.scrollIntoView({ behavior: "smooth", block: "start" });

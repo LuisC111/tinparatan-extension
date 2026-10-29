@@ -9,6 +9,8 @@ import { engineTemplate, resolveInput, safeHttpUrl } from "../lib/search.js";
 import { loadNotes, loadSettings, loadTodos, saveNotes, saveTodos } from "../lib/storage.js";
 import { applyThemeVars } from "../lib/theme.js";
 import { uid } from "../lib/util.js";
+import { formatClock, formatDate, paintTextStyle } from "../lib/clockstyle.js";
+import { greetingKey, greetingPhase, greetingPrefix } from "../lib/greeting.js";
 import { paintProfile } from "../lib/profile.js";
 import { createEffects } from "./effects.js";
 import { createSuggest } from "./suggest-ui.js";
@@ -59,7 +61,6 @@ function buildWidgets() {
   widgets.clock = el("p", "widget clock");
   widgets.clock.setAttribute("aria-live", "off");
   widgets.date = el("p", "widget date");
-  widgets.greeting = el("p", "widget greeting");
 
   widgets.notes = el("label", "widget notes");
   const notesLabel = el("span", "widget-label");
@@ -147,11 +148,13 @@ function renderTodos() {
 }
 
 function placeWidgets() {
+  const phase = greetingPhase(new Date());
+  paintTextStyle(widgets.clock, settingsRef.widgets.clock.style, { baseFamily: "var(--font-mono)", phase });
+  paintTextStyle(widgets.date, settingsRef.widgets.date.style, { baseFamily: "", phase });
   document.querySelectorAll(".slot").forEach((slot) => slot.replaceChildren());
   const entries = [
     ["clock", settingsRef.widgets.clock],
     ["date", settingsRef.widgets.date],
-    ["greeting", settingsRef.widgets.greeting],
     ["notes", settingsRef.widgets.notes],
     ["todo", settingsRef.widgets.todo],
   ];
@@ -163,36 +166,41 @@ function placeWidgets() {
   }
 }
 
-function hourKey(date) {
-  const hour = date.getHours();
-  if (hour < 12) return "greeting.morning";
-  if (hour < 20) return "greeting.afternoon";
-  return "greeting.night";
-}
-
 function tick() {
   const now = new Date();
   const locale = settingsRef.locale === "en" ? "en" : "es";
   const clock = settingsRef.widgets.clock;
-  widgets.clock.textContent = new Intl.DateTimeFormat(locale, {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: clock.seconds ? "2-digit" : undefined,
-    hour12: !clock.format24,
-  }).format(now);
-  widgets.date.textContent = new Intl.DateTimeFormat(locale, {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  }).format(now);
-  const name = settingsRef.widgets.greeting.name.trim();
-  const hello = t(hourKey(now));
-  widgets.greeting.textContent = name ? `${hello}, ${name}` : hello;
+  const date = settingsRef.widgets.date;
+  const { time, period } = formatClock(now, clock, locale);
+  if (period) {
+    const small = document.createElement("span");
+    small.className = "clock-ampm";
+    small.textContent = period;
+    widgets.clock.replaceChildren(time, small);
+  } else {
+    widgets.clock.textContent = time;
+  }
+  widgets.date.textContent = formatDate(now, date.format, date.case, locale);
+  const phase = greetingPhase(now);
+  widgets.clock.dataset.phase = phase;
+  widgets.date.dataset.phase = phase;
+  syncGreeting(now);
+}
+
+/** Greeting before the name: a fixed text, or the phrase for the time of day. */
+function syncGreeting(now = new Date()) {
+  const profile = settingsRef.profile;
+  const phase = greetingPhase(now);
+  const text = greetingPrefix(profile.greetText.trim() || t(greetingKey(phase)), Boolean(profile.name.trim()));
+  if (helloPre.textContent !== text) helloPre.textContent = text;
+  if (helloPre.dataset.phase !== phase) helloPre.dataset.phase = phase;
+  helloPre.classList.toggle("is-timed", profile.greetGradient);
 }
 
 function startClock() {
   clearInterval(clockTimer);
-  const needs = settingsRef.widgets.clock.enabled || settingsRef.widgets.date.enabled || settingsRef.widgets.greeting.enabled;
+  // The greeting follows the time of day too, so it keeps the clock running.
+  const needs = settingsRef.widgets.clock.enabled || settingsRef.widgets.date.enabled || !hello.hidden;
   if (!needs || document.hidden) return;
   tick();
   const interval = settingsRef.widgets.clock.enabled && settingsRef.widgets.clock.seconds ? 1000 : 15000;
@@ -236,10 +244,13 @@ function syncWordmark() {
 function syncProfile() {
   const profile = settingsRef.profile;
   const name = profile.name.trim();
-  hello.hidden = !profile.show || !name;
+  hello.hidden = !profile.show || (!name && !profile.greet);
   if (hello.hidden) return;
+  hello.dataset.place = profile.placement;
+  hello.style.setProperty("--u-size", `${profile.size}px`);
   helloPre.hidden = !profile.greet;
-  helloPre.textContent = `${t("profile.hello")},`;
+  uname.hidden = !name;
+  syncGreeting();
   // Re-set the text so one-shot entrance animations (Pop) replay on change.
   if (uname.textContent !== name || uname.dataset.effect !== profile.effect) {
     uname.textContent = name;
@@ -334,8 +345,12 @@ function layout() {
     shortcuts: shortcutsEl,
   };
   for (const id of settingsRef.layout.order) stack.append(nodes[id]);
-  // The name rides just above the wordmark wherever the wordmark goes.
-  stack.insertBefore(hello, wordmark);
+  // The greeting is anchored to a block, so it follows that block in any order.
+  const place = settingsRef.profile.placement;
+  if (place === "above-logo") stack.insertBefore(hello, logoWrap);
+  else if (place === "below-wordmark") wordmark.after(hello);
+  else if (place === "below-search") searchForm.after(hello);
+  else stack.insertBefore(hello, wordmark);
   searchForm.hidden = !settingsRef.search.enabled;
   searchInput.placeholder = settingsRef.search.placeholder || t("ntp.searchPlaceholder");
 }

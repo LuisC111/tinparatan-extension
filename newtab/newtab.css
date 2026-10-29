@@ -163,10 +163,18 @@ html[data-scheme="light"] .vignette {
   line-height: 1;
 }
 .date {
-  color: var(--muted);
   font-size: 13px;
   letter-spacing: 0.01em;
-  text-transform: capitalize;
+}
+/* Theme color only when no name-style effect is applied (Reloj y fecha). */
+.date:not(.uname):not(.is-timed) { color: var(--muted); }
+.clock.uname, .date.uname { margin: 0; padding: 0.04em 0 0.1em; }
+.clock-ampm {
+  margin-left: 0.22em;
+  font-size: 0.42em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  vertical-align: 0.15em;
 }
 .greeting { font-size: 15px; letter-spacing: -0.01em; }
 
@@ -342,6 +350,14 @@ html[data-search-style="line"] .search-form input {
   padding-left: 2px;
 }
 html[data-search-style="square"] .search-form input { border-radius: 10px; }
+/* Text alignment (placeholder and typed text). Centered text gets extra room on
+   the left to balance the clear button on the right. */
+html[data-search-align="center"] .search-form input { text-align: center; padding-left: 44px; }
+html[data-search-align="right"] .search-form input { text-align: right; }
+html[data-search-style="line"][data-search-align="center"] .search-form input { padding-left: 24px; }
+/* Everything clickable in the search area shows a hand. */
+.search-form input::-webkit-search-cancel-button { cursor: pointer; }
+.suggest .sg, .suggest .sg * { cursor: pointer; }
 
 .shortcuts {
   display: grid;
@@ -405,22 +421,34 @@ html[data-search-style="square"] .search-form input { border-radius: 10px; }
 .shortcut:focus-visible { outline: none; }
 html[data-align-x="left"] .shortcuts { justify-items: start; }
 
-/* Display name above the wordmark */
+/* Greeting + display name. Placement comes in as data-place. */
 .hello {
   margin: 0 0 calc(var(--gap) * -0.55);
   max-width: 94vw;
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   justify-content: center;
-  gap: 0.45em;
+  column-gap: 0.32em;
+  row-gap: 0;
   color: var(--muted);
-  font-size: 17px;
-  letter-spacing: 0.02em;
+  /* The greeting is ~74% of the name, so both read as one line. */
+  font-size: calc(var(--u-size, 30px) * 0.74);
+  line-height: 1.15;
+  letter-spacing: 0.01em;
   animation: tinp-rise 0.8s ease both;
   overflow: visible;
 }
-.hello[hidden] { display: none; }
-.hello-pre { font-family: var(--font-ui, inherit); opacity: 0.85; }
+.hello[hidden], .hello > [hidden] { display: none; }
+.hello[data-place="above-logo"] { margin: 0 0 calc(var(--gap) * 0.15); }
+.hello[data-place="below-wordmark"] { margin: calc(var(--gap) * -0.5) 0 calc(var(--gap) * -0.1); }
+.hello[data-place="below-search"] { margin: calc(var(--gap) * -0.25) 0 0; }
+.hello-pre {
+  font-family: var(--font-ui, inherit);
+  font-weight: 600;
+  white-space: nowrap;
+  color: color-mix(in srgb, var(--text) 78%, transparent);
+}
 .hello .uname { max-width: 80vw; overflow: visible; }
 html[data-align-x="left"] .hello { justify-content: flex-start; }
 html[data-align-x="right"] .hello { justify-content: flex-end; }

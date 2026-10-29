@@ -4,7 +4,22 @@ import test from "node:test";
 import { parseBackup, buildBackup } from "../lib/backup.js";
 import { sanitizeCss } from "../lib/css-sanitize.js";
 import { isLight, safeColor } from "../lib/color.js";
+import {
+  CLOCK_STYLE_DEFAULTS,
+  DATE_STYLE_DEFAULTS,
+  TEXT_EFFECTS,
+  formatClock,
+  formatDate,
+} from "../lib/clockstyle.js";
 import { normalizeSettings } from "../lib/normalize.js";
+import {
+  GREETING_GRADIENTS,
+  GREETING_PHASES,
+  greetingKey,
+  greetingPhase,
+  greetingPrefix,
+  msToNextMinute,
+} from "../lib/greeting.js";
 import { planStartupTabs, tabsNeedingReload } from "../lib/pinned.js";
 import { applyVisualPreset, PRESETS } from "../lib/presets.js";
 import { resolveInput, safeHttpUrl } from "../lib/search.js";
@@ -48,7 +63,7 @@ test("manifest is a loadable MV3 extension", () => {
   ]) {
     assert.equal(fs.existsSync(new URL(`../${file}`, import.meta.url)), true, file);
   }
-  assert.equal(manifest.version, "1.2.0");
+  assert.equal(manifest.version, "1.3.0");
   assert.deepEqual(manifest.host_permissions, SUGGEST_HOSTS);
   assert.deepEqual(manifest.optional_permissions, ["history"]);
   assert.equal(manifest.permissions.includes("history"), false, "history must stay optional");
@@ -339,7 +354,7 @@ test("display name profile normalizes and randomizes safely", () => {
 
 test("settings defaults and v1 migration for suggestions and profile", () => {
   const fresh = normalizeSettings(null);
-  assert.equal(fresh.version, 2);
+  assert.equal(fresh.version, 3);
   assert.deepEqual(fresh.search.suggest, { engine: "google", shortcuts: true, history: false });
   assert.equal(fresh.profile.name, "");
   assert.equal(fresh.profile.effect, "neon");
@@ -348,7 +363,7 @@ test("settings defaults and v1 migration for suggestions and profile", () => {
   assert.equal(v1.search.engine, "brave");
   assert.equal(v1.search.suggest.engine, "google");
   assert.equal(v1.profile.name, "Lucho", "greeting name is adopted");
-  assert.equal(v1.widgets.greeting.name, "Lucho");
+  assert.equal(v1.widgets.greeting, undefined, "the old top greeting widget is gone");
 
   const v2 = normalizeSettings({
     search: { suggest: { engine: "nope", shortcuts: false, history: "x" } },
@@ -365,4 +380,153 @@ test("settings defaults and v1 migration for suggestions and profile", () => {
   const styled = applyVisualPreset(normalizeSettings({ profile: { name: "Lucho", effect: "prism" } }), PRESETS[1].id);
   assert.equal(styled.profile.name, "Lucho");
   assert.equal(styled.profile.effect, "prism");
+});
+
+test("greeting phases cover the day with exact boundaries", () => {
+  // Contiguous, no gaps, whole day.
+  assert.equal(GREETING_PHASES[0].from, 0);
+  assert.equal(GREETING_PHASES.at(-1).to, 1440);
+  for (let i = 1; i < GREETING_PHASES.length; i += 1) assert.equal(GREETING_PHASES[i].from, GREETING_PHASES[i - 1].to);
+  const at = (h, m = 0) => greetingPhase(new Date(2026, 9, 28, h, m, 0));
+  const cases = [
+    [0, 0, "madrugada"], [4, 59, "madrugada"],
+    [5, 0, "amanecer"], [6, 59, "amanecer"],
+    [7, 0, "manana"], [11, 59, "manana"],
+    [12, 0, "mediodia"], [13, 59, "mediodia"],
+    [14, 0, "tarde"], [17, 59, "tarde"],
+    [18, 0, "atardecer"], [19, 29, "atardecer"],
+    [19, 30, "noche"], [23, 59, "noche"],
+  ];
+  for (const [h, m, phase] of cases) assert.equal(at(h, m), phase, `${h}:${m}`);
+  assert.equal(greetingPhase(1440 + 60), "madrugada", "minutes wrap around midnight");
+  assert.equal(greetingPhase(-1), "noche");
+  for (const phase of GREETING_PHASES) {
+    assert.equal(GREETING_GRADIENTS[phase.id].length, 3);
+    assert.ok(GREETING_GRADIENTS[phase.id].every((c) => /^#[0-9a-f]{6}$/.test(c)));
+  }
+  assert.equal(greetingKey("nope"), "greeting.noche");
+  assert.equal(msToNextMinute(new Date(2026, 9, 28, 10, 0, 59, 900)), 150);
+});
+
+test("greeting phrases, prefix and css stay in sync", async () => {
+  const { es: dict } = await import("../lib/locales/es.js");
+  const phrases = Object.fromEntries(GREETING_PHASES.map((p) => [p.id, greetingKey(p.id).split(".").reduce((n, k) => n?.[k], dict)]));
+  assert.deepEqual(phrases, {
+    madrugada: "Buena madrugada",
+    amanecer: "Buenos días",
+    manana: "Buenos días",
+    mediodia: "Buen mediodía",
+    tarde: "Buenas tardes",
+    atardecer: "Buenas tardes",
+    noche: "Buenas noches",
+  });
+  assert.equal(greetingPrefix("Buenas noches", true), "Buenas noches,");
+  assert.equal(greetingPrefix("Buenas noches", false), "Buenas noches");
+  assert.equal(greetingPrefix("¡Qué más!", true), "¡Qué más!");
+  assert.equal(greetingPrefix("  ", true), "");
+  const css = fs.readFileSync(new URL("../assets/profile.css", import.meta.url), "utf8");
+  for (const [id, colors] of Object.entries(GREETING_GRADIENTS)) {
+    const rule = css.match(new RegExp(`data-phase="${id}"\\] \\{([^}]*)\\}`));
+    assert.ok(rule, `css for ${id}`);
+    for (const c of colors) assert.ok(rule[1].includes(c), `${id} uses ${c}`);
+  }
+});
+
+test("v3 migration folds the top greeting widget into the profile", () => {
+  // v2 with the old widget on and a profile: widget removed, profile untouched.
+  const v2 = normalizeSettings({
+    version: 2,
+    widgets: { clock: { enabled: true }, greeting: { enabled: true, position: "top-center", name: "Lucho" } },
+    profile: { name: "Lucho", effect: "neon" },
+  });
+  assert.equal(v2.version, 3);
+  assert.equal(v2.widgets.greeting, undefined);
+  assert.equal(v2.widgets.clock.enabled, true, "clock is kept");
+  assert.equal(v2.profile.name, "Lucho");
+  assert.equal(v2.profile.greet, true);
+  assert.equal(v2.profile.greetText, "");
+  assert.equal(v2.profile.greetGradient, true);
+  assert.equal(v2.profile.placement, "between");
+  // Bad values fall back; good ones survive a round trip.
+  const odd = normalizeSettings({ profile: { placement: "sideways", greetGradient: "yes", greetText: 42 } });
+  assert.equal(odd.profile.placement, "between");
+  assert.equal(odd.profile.greetGradient, true);
+  assert.equal(odd.profile.greetText, "");
+  const kept = normalizeSettings({ profile: { placement: "below-wordmark", greetGradient: false, greetText: "Qué más" } });
+  assert.deepEqual(
+    [kept.profile.placement, kept.profile.greetGradient, kept.profile.greetText],
+    ["below-wordmark", false, "Qué más"],
+  );
+  assert.equal(normalizeSettings({ profile: { greetText: "x".repeat(80) } }).profile.greetText.length, 40);
+  assert.deepEqual(normalizeSettings(kept), kept, "normalize is idempotent");
+});
+
+test("search text alignment defaults to left and rejects junk", () => {
+  assert.equal(normalizeSettings(null).search.align, "left");
+  assert.equal(normalizeSettings({ search: { align: "center" } }).search.align, "center");
+  assert.equal(normalizeSettings({ search: { align: "right" } }).search.align, "right");
+  assert.equal(normalizeSettings({ search: { align: "justify" } }).search.align, "left");
+  const css = fs.readFileSync(new URL("../newtab/newtab.css", import.meta.url), "utf8");
+  assert.match(css, /data-search-align="center"\] \.search-form input \{ text-align: center/);
+  assert.match(css, /-webkit-search-cancel-button \{ cursor: pointer; \}/);
+});
+
+test("clock formats 24h, 12h and the a. m./p. m. styles", () => {
+  const evening = new Date(2026, 9, 28, 21, 5, 9);
+  const morning = new Date(2026, 9, 28, 0, 7, 3);
+  assert.deepEqual(formatClock(evening, { format24: true, seconds: false }), { time: "21:05", period: "" });
+  assert.deepEqual(formatClock(evening, { format24: true, seconds: true }), { time: "21:05:09", period: "" });
+  assert.deepEqual(formatClock(morning, { format24: true }), { time: "00:07", period: "" });
+  assert.deepEqual(formatClock(evening, { format24: false, ampm: "full" }), { time: "9:05", period: "p.\u00a0m." });
+  assert.deepEqual(formatClock(morning, { format24: false, ampm: "full" }), { time: "12:07", period: "a.\u00a0m." });
+  assert.deepEqual(formatClock(new Date(2026, 9, 28, 12, 0), { format24: false, ampm: "short" }), { time: "12:00", period: "pm" });
+  assert.deepEqual(formatClock(evening, { format24: false, ampm: "hidden", seconds: true }), { time: "9:05:09", period: "" });
+  assert.equal(formatClock(evening, { format24: false, ampm: "full" }, "en").period, "PM");
+});
+
+test("date formats and capitalization", () => {
+  const day = new Date(2026, 9, 28, 10, 0);
+  // Default reproduces the old CSS text-transform: capitalize.
+  assert.equal(formatDate(day), "Miércoles, 28 De Octubre");
+  assert.equal(formatDate(day, "plain", "lower"), "miércoles 28 de octubre");
+  assert.equal(formatDate(day, "numeric", "upper"), "28/10/2026");
+  assert.equal(formatDate(day, "short", "title"), "Mié 28 Oct");
+  assert.equal(formatDate(day, "long", "sentence"), "Miércoles, 28 de octubre");
+  assert.equal(formatDate(day, "long", "upper"), "MIÉRCOLES, 28 DE OCTUBRE");
+  assert.equal(formatDate(day, "full", "lower"), "miércoles, 28 de octubre de 2026");
+  assert.equal(formatDate(day, "bogus", "bogus"), "Miércoles, 28 De Octubre");
+  assert.equal(formatDate(day, "numeric", "title", "en"), "10/28/2026");
+  assert.equal(formatDate(day, "short", "title", "en"), "Wed Oct 28");
+});
+
+test("clock and date styles default to the original look and reject junk", () => {
+  const fresh = normalizeSettings(null);
+  assert.deepEqual(fresh.widgets.clock.style, CLOCK_STYLE_DEFAULTS);
+  assert.deepEqual(fresh.widgets.date.style, DATE_STYLE_DEFAULTS);
+  assert.equal(fresh.widgets.clock.ampm, "full");
+  assert.equal(fresh.widgets.date.format, "long");
+  assert.equal(fresh.widgets.date.case, "title");
+  // v2 data without any style keeps the old clock settings and gets the defaults.
+  const v2 = normalizeSettings({ version: 2, widgets: { clock: { enabled: true, format24: false, seconds: true } } });
+  assert.equal(v2.widgets.clock.format24, false);
+  assert.equal(v2.widgets.clock.seconds, true);
+  assert.deepEqual(v2.widgets.clock.style, CLOCK_STYLE_DEFAULTS);
+  const junk = normalizeSettings({
+    widgets: {
+      clock: { ampm: "x", style: { fontId: "comic", size: 999, weight: 450, effect: "fire", colors: ["red", "#ABCDEF"], letterSpacing: 3, opacity: 5 } },
+      date: { format: "x", case: "x", style: { size: "a", effect: "time", fontId: "pacifico" } },
+    },
+  });
+  assert.deepEqual(junk.widgets.clock.style, {
+    fontId: "default", size: 160, weight: 500, effect: "plain", colors: ["#f5f7fb", "#abcdef"], letterSpacing: 0.4, opacity: 20,
+  });
+  assert.equal(junk.widgets.clock.ampm, "full");
+  assert.equal(junk.widgets.date.format, "long");
+  assert.equal(junk.widgets.date.case, "title");
+  assert.equal(junk.widgets.date.style.size, 13);
+  assert.equal(junk.widgets.date.style.effect, "time");
+  assert.equal(junk.widgets.date.style.fontId, "pacifico");
+  assert.ok(TEXT_EFFECTS.includes("time") && TEXT_EFFECTS.includes("neon") && TEXT_EFFECTS[0] === "plain");
+  // Round-trip is stable.
+  assert.deepEqual(normalizeSettings(structuredClone(junk)).widgets, junk.widgets);
 });

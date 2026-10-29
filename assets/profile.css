@@ -191,3 +191,36 @@
   html:not([data-motion="on"]) .uname { animation: none !important; }
 }
 html[data-motion="off"] .uname { animation: none !important; }
+
+/* Time-of-day gradient (greeting, and clock/date with effect "time"): a slow gradient that changes with the time of day.
+   The stops are registered so a phase change cross-fades instead of jumping. */
+@property --g1 { syntax: "<color>"; inherits: true; initial-value: #c9d3e6; }
+@property --g2 { syntax: "<color>"; inherits: true; initial-value: #ffffff; }
+@property --g3 { syntax: "<color>"; inherits: true; initial-value: #c9d3e6; }
+.is-timed {
+  color: transparent;
+  background-image: linear-gradient(100deg, var(--g1) 0%, var(--g2) 25%, var(--g3) 50%, var(--g2) 75%, var(--g1) 100%);
+  background-size: 200% 100%;
+  background-position: 0% 50%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 0 14px color-mix(in srgb, var(--g1) 32%, transparent));
+  animation: greet-flow 16s ease-in-out infinite alternate;
+  transition: --g1 2.4s ease, --g2 2.4s ease, --g3 2.4s ease;
+  padding-bottom: 0.08em;
+}
+[data-phase="madrugada"] { --g1: #6d5dfc; --g2: #a78bfa; --g3: #4f46e5; }
+[data-phase="amanecer"] { --g1: #ff8fb8; --g2: #ffb48a; --g3: #ffd56b; }
+[data-phase="manana"] { --g1: #ffcf5a; --g2: #fff0b8; --g3: #7cc8ff; }
+[data-phase="mediodia"] { --g1: #ffe94d; --g2: #fffbd1; --g3: #3ce0ff; }
+[data-phase="tarde"] { --g1: #ff9a1f; --g2: #ffc23d; --g3: #ffdf8a; }
+[data-phase="atardecer"] { --g1: #ff4fa3; --g2: #ff7a3d; --g3: #ff3b3b; }
+[data-phase="noche"] { --g1: #5b7cff; --g2: #a06bff; --g3: #2dd4bf; }
+@keyframes greet-flow {
+  from { background-position: 0% 50%; }
+  to { background-position: 100% 50%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion="on"]) .is-timed { animation: none !important; transition: none !important; background-position: 30% 50%; }
+}
+html[data-motion="off"] .is-timed { animation: none !important; transition: none !important; background-position: 30% 50%; }

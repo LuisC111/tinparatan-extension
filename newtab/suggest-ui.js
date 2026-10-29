@@ -90,7 +90,10 @@ export function createSuggest({ form, input, list, ghost, getSettings, isPreview
     const completion = active < 0 && document.activeElement === input ? inlineCompletion(value, items) : "";
     const fits = input.scrollWidth <= input.clientWidth + 1;
     const caretAtEnd = input.selectionStart === value.length && input.selectionEnd === value.length;
-    if (!completion || !fits || !caretAtEnd) {
+    // Centered/right text moves as it grows, so an overlay cannot sit after the caret.
+    // Tab still accepts the completion; only the grey hint is skipped.
+    const leftAligned = (getSettings()?.search?.align || "left") === "left";
+    if (!completion || !fits || !caretAtEnd || !leftAligned) {
       ghost.hidden = true;
       return;
     }

@@ -9,7 +9,9 @@ import { engineTemplate, resolveInput, safeHttpUrl } from "../lib/search.js";
 import { loadNotes, loadSettings, loadTodos, saveNotes, saveTodos } from "../lib/storage.js";
 import { applyThemeVars } from "../lib/theme.js";
 import { uid } from "../lib/util.js";
+import { paintProfile } from "../lib/profile.js";
 import { createEffects } from "./effects.js";
+import { createSuggest } from "./suggest-ui.js";
 
 const isPreview = new URLSearchParams(location.search).get("preview") === "1";
 const DEFAULT_LOGO = "../assets/logo.png";
@@ -26,6 +28,9 @@ const sr = document.getElementById("wm-sr");
 const searchForm = document.getElementById("search-form");
 const searchInput = document.getElementById("q");
 const shortcutsEl = document.getElementById("shortcuts");
+const hello = document.getElementById("hello");
+const helloPre = document.getElementById("hello-pre");
+const uname = document.getElementById("uname");
 const customCss = document.getElementById("custom-css");
 const video = document.querySelector(".bg-video");
 const bgImage = document.querySelector(".bg-image");
@@ -33,6 +38,8 @@ const canvas = document.getElementById("fx");
 const fx = createEffects(canvas);
 
 let settingsRef = normalizeSettings(null);
+let suggest = null;
+let suggestSig = "";
 let notesText = "";
 let todoItems = [];
 let typeTimer = 0;
@@ -226,6 +233,23 @@ function syncWordmark() {
   startTyping(text);
 }
 
+function syncProfile() {
+  const profile = settingsRef.profile;
+  const name = profile.name.trim();
+  hello.hidden = !profile.show || !name;
+  if (hello.hidden) return;
+  helloPre.hidden = !profile.greet;
+  helloPre.textContent = `${t("profile.hello")},`;
+  // Re-set the text so one-shot entrance animations (Pop) replay on change.
+  if (uname.textContent !== name || uname.dataset.effect !== profile.effect) {
+    uname.textContent = name;
+    uname.style.animation = "none";
+    void uname.offsetWidth;
+    uname.style.removeProperty("animation");
+  }
+  paintProfile(uname, profile);
+}
+
 async function syncMedia() {
   const token = ++mediaToken;
   logoWrap.hidden = settingsRef.logo.mode === "none";
@@ -310,6 +334,8 @@ function layout() {
     shortcuts: shortcutsEl,
   };
   for (const id of settingsRef.layout.order) stack.append(nodes[id]);
+  // The name rides just above the wordmark wherever the wordmark goes.
+  stack.insertBefore(hello, wordmark);
   searchForm.hidden = !settingsRef.search.enabled;
   searchInput.placeholder = settingsRef.search.placeholder || t("ntp.searchPlaceholder");
 }
@@ -320,6 +346,7 @@ function apply(settings) {
   applyThemeVars(settings);
   customCss.textContent = sanitizeCss(settings.customCss);
   syncWordmark();
+  syncProfile();
   layout();
   placeWidgets();
   applyI18n();
@@ -330,6 +357,9 @@ function apply(settings) {
   fx.sync(settings);
   syncMedia();
   renderShortcuts();
+  const sig = JSON.stringify(settings.search.suggest);
+  if (suggest && sig !== suggestSig) suggest.refresh();
+  suggestSig = sig;
   if (!isPreview) writePaint(settings);
 }
 
@@ -337,13 +367,27 @@ function bind() {
   document.getElementById("settings-btn").addEventListener("click", () => {
     if (!isPreview) chrome.runtime.openOptionsPage();
   });
+  const open = (url) => {
+    if (!url || isPreview) return;
+    if (settingsRef.search.openIn === "tab") chrome.tabs.create({ url });
+    else location.assign(url);
+  };
   searchForm.addEventListener("submit", (event) => {
     event.preventDefault();
     if (isPreview) return;
-    const url = resolveInput(searchInput.value, engineTemplate(settingsRef));
-    if (!url) return;
-    if (settingsRef.search.openIn === "tab") chrome.tabs.create({ url });
-    else location.assign(url);
+    open(resolveInput(searchInput.value, engineTemplate(settingsRef)));
+  });
+  suggest = createSuggest({
+    form: searchForm,
+    input: searchInput,
+    list: document.getElementById("suggest-list"),
+    ghost: document.getElementById("ghost-complete"),
+    getSettings: () => settingsRef,
+    isPreview,
+    onOpen: ({ url, text }) => {
+      if (url) open(safeHttpUrl(url));
+      else open(resolveInput(text, engineTemplate(settingsRef)));
+    },
   });
   window.addEventListener("keydown", (event) => {
     if (isPreview || event.metaKey || event.ctrlKey || event.altKey) return;
@@ -363,6 +407,7 @@ function bind() {
       searchInput.focus();
       searchInput.value = event.key;
       event.preventDefault();
+      suggest?.kick();
     }
   });
   document.addEventListener("visibilitychange", () => {

@@ -9,6 +9,7 @@
     <style>html,body{margin:0;height:100%;background:var(--bg,#070b14);color:var(--text,#f5f7fb)}</style>
     <script src="../lib/boot.js"></script>
     <link rel="stylesheet" href="../assets/tokens.css">
+    <link rel="stylesheet" href="../assets/profile.css">
     <link rel="stylesheet" href="newtab.css">
   </head>
   <body>
@@ -44,6 +45,7 @@
         <div class="logo-wrap" id="logo-wrap">
           <img id="logo" class="logo-img" src="../assets/logo.png" alt="">
         </div>
+        <p class="hello" id="hello" hidden><span class="hello-pre" id="hello-pre">Hola,</span> <span class="uname" id="uname"></span></p>
         <h1 class="wordmark" id="wordmark">
           <span class="sr-only" id="wm-sr">tinparatan</span>
           <span class="prompt" id="wm-prompt" aria-hidden="true">&gt;</span><span class="wm-line" aria-hidden="true">
@@ -53,7 +55,11 @@
         </h1>
         <form id="search-form" class="search-form" role="search">
           <label class="sr-only" for="q" data-i18n="ntp.searchLabel">Buscar o escribir una dirección</label>
-          <input id="q" name="q" type="search" autocomplete="off" spellcheck="false" autocapitalize="off" enterkeyhint="search" placeholder="Buscar o escribir dirección">
+          <div class="search-box">
+            <input id="q" name="q" type="search" autocomplete="off" spellcheck="false" autocapitalize="off" enterkeyhint="search" placeholder="Buscar o escribir dirección" role="combobox" aria-autocomplete="both" aria-expanded="false" aria-controls="suggest-list">
+            <span class="ghost-complete" id="ghost-complete" aria-hidden="true" hidden><span class="gc-typed"></span><span class="gc-rest"></span></span>
+          </div>
+          <ul class="suggest" id="suggest-list" role="listbox" data-i18n-aria="suggest.label" aria-label="Sugerencias" hidden></ul>
         </form>
         <nav id="shortcuts" class="shortcuts" aria-label="Accesos" hidden></nav>
       </div>

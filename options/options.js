@@ -6,6 +6,7 @@ import { clearMedia, deleteMedia, listMedia, putMedia, revokeMedia } from "../li
 import { normalizeSettings } from "../lib/normalize.js";
 import { clearPaint, writePaint } from "../lib/paint.js";
 import { PRESETS, applyVisualPreset, snapshotVisual } from "../lib/presets.js";
+import { GRADIENT_SWATCHES, PROFILE_EFFECTS, PROFILE_FONTS, paintProfile, randomizeProfile } from "../lib/profile.js";
 import { safeHttpUrl } from "../lib/search.js";
 import { paintShortcutMark } from "../lib/shortcut-icon.js";
 import { loadNotes, loadSettings, loadTodos, resetStorage, saveBackupParts, saveSettings } from "../lib/storage.js";
@@ -57,9 +58,168 @@ function fill() {
   renderThemeSwatches();
   renderPresetGrid();
   renderUserPresets();
+  renderProfileTiles();
   applyThemeVars(state.settings);
   applyI18n();
   styleFontOptions();
+  renderProfile();
+}
+
+/* ---------- Display name (Discord-style) ---------- */
+
+function tile(className, { pressed, label, onPick }) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = className;
+  button.setAttribute("role", "radio");
+  button.setAttribute("aria-checked", pressed ? "true" : "false");
+  button.title = label;
+  button.addEventListener("click", onPick);
+  return button;
+}
+
+function renderProfileTiles() {
+  const fonts = document.getElementById("profile-fonts");
+  fonts.replaceChildren(
+    ...PROFILE_FONTS.map((font) => {
+      const button = tile("font-tile", {
+        pressed: false,
+        label: font.label,
+        onPick: () => updateProfile({ fontId: font.id }),
+      });
+      button.dataset.font = font.id;
+      const sample = document.createElement("b");
+      sample.textContent = "Gg";
+      sample.style.fontFamily = font.family;
+      sample.style.fontWeight = String(font.weight);
+      if (font.id === "press-start") sample.style.fontSize = "15px";
+      const name = document.createElement("small");
+      name.textContent = font.label;
+      button.append(sample, name);
+      return button;
+    }),
+  );
+  const effects = document.getElementById("profile-effects");
+  effects.replaceChildren(
+    ...PROFILE_EFFECTS.map((effect) => {
+      const button = tile("effect-tile", {
+        pressed: false,
+        label: t(`profile.effects.${effect.id}`),
+        onPick: () => updateProfile({ effect: effect.id }),
+      });
+      button.dataset.effectId = effect.id;
+      const sample = document.createElement("span");
+      sample.className = "uname";
+      sample.textContent = "Aa";
+      const name = document.createElement("small");
+      name.dataset.i18n = `profile.effects.${effect.id}`;
+      name.textContent = t(`profile.effects.${effect.id}`);
+      button.append(sample, name);
+      return button;
+    }),
+  );
+  const swatches = document.getElementById("profile-swatches");
+  swatches.replaceChildren(
+    ...GRADIENT_SWATCHES.map(([a, b]) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "grad-swatch";
+      button.style.background = `linear-gradient(135deg, ${a}, ${b})`;
+      button.dataset.colors = `${a},${b}`;
+      button.setAttribute("aria-label", `${a} → ${b}`);
+      button.addEventListener("click", () => {
+        const patch = { colors: [a, b] };
+        // A gradient swatch on a one-color effect would hide the second color.
+        if (state.settings.profile.effect === "solid" || state.settings.profile.effect === "prism") patch.effect = "gradient";
+        updateProfile(patch);
+      });
+      return button;
+    }),
+  );
+}
+
+function updateProfile(patch) {
+  state.settings.profile = { ...state.settings.profile, ...patch };
+  scheduleSave();
+}
+
+function renderProfile() {
+  const profile = state.settings.profile;
+  const effect = PROFILE_EFFECTS.find((entry) => entry.id === profile.effect) || PROFILE_EFFECTS[0];
+  const name = profile.name.trim() || t("profile.namePlaceholder");
+  const preview = document.getElementById("profile-preview");
+  if (preview.textContent !== name || preview.dataset.effect !== profile.effect || preview.dataset.font !== profile.fontId) {
+    preview.textContent = name;
+    preview.style.animation = "none";
+    void preview.offsetWidth;
+    preview.style.removeProperty("animation");
+  }
+  paintProfile(preview, { ...profile, size: Math.min(profile.size, 34) });
+  preview.classList.toggle("is-placeholder", !profile.name.trim());
+  document.getElementById("pc-handle").textContent = (profile.name.trim() || "tinparatan").toLowerCase().replace(/\s+/g, "_");
+  document.getElementById("pc-hello").textContent = profile.greet
+    ? `${t("profile.hello")}, ${profile.name.trim() || "…"}`
+    : profile.name.trim() || "…";
+  document.getElementById("pc-banner").style.background = `linear-gradient(135deg, ${profile.colors[0]}, ${profile.colors[1]})`;
+
+  for (const button of document.querySelectorAll(".font-tile")) {
+    const on = button.dataset.font === profile.fontId;
+    button.setAttribute("aria-checked", on ? "true" : "false");
+    button.classList.toggle("is-active", on);
+    button.querySelector("b").style.color = on ? profile.colors[0] : "";
+  }
+  for (const button of document.querySelectorAll(".effect-tile")) {
+    const on = button.dataset.effectId === profile.effect;
+    button.setAttribute("aria-checked", on ? "true" : "false");
+    button.classList.toggle("is-active", on);
+    paintProfile(button.querySelector(".uname"), { ...profile, effect: button.dataset.effectId, size: 22 });
+  }
+  for (const button of document.querySelectorAll(".grad-swatch")) {
+    button.classList.toggle("is-active", button.dataset.colors === profile.colors.join(","));
+  }
+  const c1 = document.getElementById("profile-c1");
+  const c2 = document.getElementById("profile-c2");
+  if (document.activeElement !== c1) c1.value = profile.colors[0];
+  if (document.activeElement !== c2) c2.value = profile.colors[1];
+  document.getElementById("profile-color-field").hidden = effect.colors === 0;
+  document.getElementById("profile-c2-wrap").hidden = effect.colors < 2;
+  document.getElementById("profile-prism-hint").hidden = effect.colors !== 0;
+}
+
+function bindProfile() {
+  ["profile-c1", "profile-c2"].forEach((id, index) => {
+    document.getElementById(id).addEventListener("input", (event) => {
+      const colors = [...state.settings.profile.colors];
+      colors[index] = event.target.value;
+      updateProfile({ colors });
+    });
+  });
+  document.getElementById("profile-random").addEventListener("click", () => {
+    state.settings.profile = randomizeProfile(state.settings.profile);
+    scheduleSave();
+  });
+}
+
+async function onHistoryToggle(el) {
+  if (!chrome.permissions) return;
+  try {
+    if (el.checked) {
+      const granted = await chrome.permissions.request({ permissions: ["history"] });
+      if (!granted) {
+        el.checked = false;
+        state.settings.search.suggest.history = false;
+        setStatus("suggest.historyDenied");
+        scheduleSave();
+      }
+    } else {
+      await chrome.permissions.remove({ permissions: ["history"] }).catch(() => false);
+    }
+  } catch (error) {
+    console.error(error);
+    el.checked = false;
+    state.settings.search.suggest.history = false;
+    scheduleSave();
+  }
 }
 
 function refreshVals() {
@@ -103,6 +263,8 @@ function paintCopy() {
   renderShortcuts();
   fillPositionSelects();
   styleFontOptions();
+  renderProfileTiles();
+  renderProfile();
 }
 
 function fillPositionSelects() {
@@ -609,6 +771,7 @@ function scheduleSave() {
   sendPreview();
   updateConditional();
   refreshVals();
+  renderProfile();
   setStatus("options.saving");
   clearTimeout(saveTimer);
   saveRevision += 1;
@@ -629,7 +792,7 @@ function scheduleSave() {
   }, 220);
 }
 
-function onControl(el) {
+function onControl(el, event) {
   if (!el?.dataset.bind) return;
   if (el.type === "radio" && !el.checked) return;
   const value = readControl(el);
@@ -645,6 +808,7 @@ function onControl(el) {
   if (el.dataset.bind === "locale") paintCopy();
   highlightPreset();
   scheduleSave();
+  if (el.dataset.bind === "search.suggest.history" && event?.type !== "input") onHistoryToggle(el);
 }
 
 async function storeFile(id, file, { kinds, max = 80 * 1024 * 1024 }) {
@@ -698,8 +862,9 @@ function base64ToBlob(data, type) {
 }
 
 function bind() {
-  document.body.addEventListener("input", (event) => onControl(event.target.closest("[data-bind]")));
-  document.body.addEventListener("change", (event) => onControl(event.target.closest("[data-bind]")));
+  document.body.addEventListener("input", (event) => onControl(event.target.closest("[data-bind]"), event));
+  document.body.addEventListener("change", (event) => onControl(event.target.closest("[data-bind]"), event));
+  bindProfile();
   document.querySelectorAll(".nav button").forEach((button) => {
     button.addEventListener("click", () => {
       document.getElementById(button.dataset.goto)?.scrollIntoView({ behavior: "smooth", block: "start" });

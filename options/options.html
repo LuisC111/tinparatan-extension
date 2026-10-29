@@ -9,6 +9,7 @@
     <style>html,body{margin:0;background:var(--bg,#070b14);color:var(--text,#f5f7fb)}</style>
     <script src="../lib/boot.js"></script>
     <link rel="stylesheet" href="../assets/tokens.css">
+    <link rel="stylesheet" href="../assets/profile.css">
     <link rel="stylesheet" href="options.css">
   </head>
   <body>
@@ -25,6 +26,7 @@
           <button type="button" data-goto="apariencia" data-i18n="nav.appearance">Apariencia</button>
           <button type="button" data-goto="logotipo" data-i18n="nav.logo">Logotipo</button>
           <button type="button" data-goto="wordmark" data-i18n="nav.wordmark">Wordmark</button>
+          <button type="button" data-goto="perfil" data-i18n="nav.profile">Nombre de usuario</button>
           <button type="button" data-goto="disposicion" data-i18n="nav.layout">Disposición</button>
           <button type="button" data-goto="fondo" data-i18n="nav.background">Fondo</button>
           <button type="button" data-goto="busqueda" data-i18n="nav.search">Búsqueda</button>
@@ -159,6 +161,56 @@
           </div>
         </section>
 
+        <section class="section" id="perfil">
+          <h2 data-i18n="sections.profile.title"></h2>
+          <p class="lede" data-i18n="sections.profile.desc"></p>
+          <div class="profile-grid">
+            <div class="card profile-editor">
+              <label class="check"><input type="checkbox" data-bind="profile.show"><span data-i18n="profile.show"></span></label>
+              <label class="field">
+                <span data-i18n="profile.name"></span>
+                <input type="text" maxlength="32" data-bind="profile.name" id="profile-name" autocomplete="nickname" data-i18n-placeholder="profile.namePlaceholder">
+              </label>
+              <label class="check"><input type="checkbox" data-bind="profile.greet"><span data-i18n="profile.greet"></span></label>
+              <label class="field">
+                <span class="field-head"><span data-i18n="profile.size"></span><span class="val" data-val="profile.size" data-suffix="px"></span></span>
+                <input type="range" min="16" max="56" step="1" data-bind="profile.size" data-kind="number">
+              </label>
+              <div class="field">
+                <span data-i18n="profile.font"></span>
+                <div class="font-tiles" id="profile-fonts" role="radiogroup" data-i18n-aria="profile.font"></div>
+              </div>
+              <div class="field">
+                <span data-i18n="profile.effect"></span>
+                <div class="effect-tiles" id="profile-effects" role="radiogroup" data-i18n-aria="profile.effect"></div>
+              </div>
+              <div class="field" id="profile-color-field">
+                <span data-i18n="profile.colors"></span>
+                <div class="color-row">
+                  <label class="color-pick"><input type="color" id="profile-c1"><span data-i18n="profile.color1"></span></label>
+                  <label class="color-pick" id="profile-c2-wrap"><input type="color" id="profile-c2"><span data-i18n="profile.color2"></span></label>
+                </div>
+                <div class="grad-swatches" id="profile-swatches"></div>
+              </div>
+              <p class="hint" id="profile-prism-hint" data-i18n="profile.prismHint" hidden></p>
+              <div class="actions">
+                <button type="button" class="btn btn-primary" id="profile-random"><span aria-hidden="true">🎲</span> <span data-i18n="profile.random"></span></button>
+              </div>
+            </div>
+            <div class="profile-card" aria-live="polite">
+              <div class="pc-banner" id="pc-banner"></div>
+              <div class="pc-avatar"><img src="../assets/logo.png" alt=""><i></i></div>
+              <div class="pc-body">
+                <span class="uname" id="profile-preview"></span>
+                <span class="pc-handle" id="pc-handle"></span>
+                <div class="pc-divider"></div>
+                <span class="pc-label" data-i18n="profile.cardLabel"></span>
+                <span class="pc-hello" id="pc-hello"></span>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section class="section" id="disposicion">
           <h2 data-i18n="sections.layout.title"></h2>
           <p class="lede" data-i18n="sections.layout.desc"></p>
@@ -270,6 +322,19 @@
                 <option value="custom" data-i18n="engines.custom"></option>
               </select>
             </label>
+            <label class="field">
+              <span data-i18n="suggest.engine"></span>
+              <select data-bind="search.suggest.engine" id="suggest-select">
+                <option value="google" data-i18n="suggest.engines.google"></option>
+                <option value="duckduckgo" data-i18n="suggest.engines.duckduckgo"></option>
+                <option value="brave" data-i18n="suggest.engines.brave"></option>
+                <option value="off" data-i18n="suggest.engines.off"></option>
+              </select>
+              <span class="hint" data-i18n="suggest.privacy"></span>
+            </label>
+            <label class="check"><input type="checkbox" data-bind="search.suggest.shortcuts"><span data-i18n="suggest.shortcuts"></span></label>
+            <label class="check"><input type="checkbox" data-bind="search.suggest.history" id="suggest-history"><span data-i18n="suggest.history"></span></label>
+            <p class="hint" data-i18n="suggest.historyHint"></p>
             <label class="field" data-show-engine="custom">
               <span data-i18n="fields.customUrl"></span>
               <input type="url" data-bind="search.customUrl" spellcheck="false" placeholder="https://duckduckgo.com/?q=%s">

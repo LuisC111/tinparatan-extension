@@ -1,0 +1,193 @@
+/* Display-name faces (SIL OFL 1.1, bundled; see fonts/LICENSES.md) and effects. */
+@font-face {
+  font-family: "TP Montserrat";
+  src: url("fonts/montserrat-800.woff2") format("woff2");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "TP Playfair";
+  src: url("fonts/playfair-700.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "TP Unifraktur";
+  src: url("fonts/unifraktur-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "TP Pacifico";
+  src: url("fonts/pacifico-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "TP Caveat";
+  src: url("fonts/caveat-700.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "TP Fredoka";
+  src: url("fonts/fredoka-600.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "TP Bebas Neue";
+  src: url("fonts/bebas-neue-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "TP Press Start";
+  src: url("fonts/press-start-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "TP Bangers";
+  src: url("fonts/bangers-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "TP Orbitron";
+  src: url("fonts/orbitron-800.woff2") format("woff2");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "TP Lobster";
+  src: url("fonts/lobster-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* .uname: the display name. Colors come in as --u1/--u2, font as --u-font. */
+.uname {
+  --u1: #ff3b5c;
+  --u2: #7c5cff;
+  display: inline-block;
+  position: relative;
+  font-family: var(--u-font, inherit);
+  font-weight: var(--u-weight, 700);
+  font-size: calc(var(--u-size, 30px) * var(--u-scale, 1));
+  line-height: 1.15;
+  letter-spacing: 0.005em;
+  padding: 0.04em 0.12em 0.1em;
+  margin: 0 -0.12em;
+  white-space: nowrap;
+  color: var(--u1);
+}
+.uname[data-font="press-start"] { line-height: 1.5; letter-spacing: 0.02em; }
+.uname[data-font="bebas-neue"], .uname[data-font="bangers"] { letter-spacing: 0.04em; }
+
+/* Sólido: plain color with a soft halo so it still "shines". */
+.uname[data-effect="solid"] {
+  text-shadow: 0 0 18px color-mix(in srgb, var(--u1) 45%, transparent);
+}
+
+/* Degradado */
+.uname[data-effect="gradient"],
+.uname[data-effect="jelly"],
+.uname[data-effect="prism"] {
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+.uname[data-effect="gradient"] {
+  background-image: linear-gradient(100deg, var(--u1), var(--u2));
+  filter: drop-shadow(0 0 14px color-mix(in srgb, var(--u1) 38%, transparent));
+}
+
+/* Neón: white-hot core, colored tubes, slow breathing pulse. */
+.uname[data-effect="neon"] {
+  color: color-mix(in srgb, var(--u1) 28%, white);
+  text-shadow:
+    0 0 2px #fff,
+    0 0 6px var(--u1),
+    0 0 14px var(--u1),
+    0 0 28px var(--u1),
+    0 0 52px color-mix(in srgb, var(--u1) 70%, transparent);
+  animation: uname-neon 2.8s ease-in-out infinite;
+}
+
+/* Caricatura: ink outline + hard comic shadow. */
+.uname[data-effect="cartoon"] {
+  color: var(--u1);
+  -webkit-text-stroke: 0.09em #0b0d14;
+  paint-order: stroke fill;
+  text-shadow: 0.07em 0.08em 0 #0b0d14, 0.07em 0.08em 0.3em rgba(0, 0, 0, 0.35);
+  transform: rotate(-2deg);
+}
+
+/* Pop: stacked offset drop shadow in the second color. */
+.uname[data-effect="pop"] {
+  color: var(--u1);
+  text-shadow:
+    0.04em 0.04em 0 var(--u2),
+    0.08em 0.08em 0 color-mix(in srgb, var(--u2) 75%, black),
+    0.12em 0.12em 0.18em rgba(0, 0, 0, 0.4);
+  animation: uname-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Gomita: glossy candy gradient that wobbles now and then. */
+.uname[data-effect="jelly"] {
+  background-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0 14%, transparent 46%),
+    linear-gradient(160deg, color-mix(in srgb, var(--u1) 70%, white), var(--u1) 45%, var(--u2));
+  filter:
+    drop-shadow(0 2px 0 color-mix(in srgb, var(--u2) 60%, black))
+    drop-shadow(0 0 12px color-mix(in srgb, var(--u1) 45%, transparent));
+  transform-origin: 50% 90%;
+  animation: uname-jelly 3.6s ease-in-out infinite;
+}
+
+/* Prism: shifting rainbow. */
+.uname[data-effect="prism"] {
+  background-image: linear-gradient(90deg, #ff4d6d, #ffb020, #f7f052, #3ef08a, #22d3ee, #7c5cff, #ff4dd8, #ff4d6d);
+  background-size: 300% 100%;
+  filter: drop-shadow(0 0 12px rgba(160, 120, 255, 0.4));
+  animation: uname-prism 6s linear infinite;
+}
+
+@keyframes uname-neon {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.28) saturate(1.15); }
+  52% { filter: brightness(0.82); }
+  54% { filter: brightness(1.22); }
+}
+@keyframes uname-pop {
+  from { transform: scale(0.6); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+@keyframes uname-jelly {
+  0%, 70%, 100% { transform: scale(1, 1); }
+  76% { transform: scale(1.08, 0.9); }
+  82% { transform: scale(0.95, 1.06); }
+  88% { transform: scale(1.03, 0.97); }
+  94% { transform: scale(0.99, 1.01); }
+}
+@keyframes uname-prism {
+  from { background-position: 0% 50%; }
+  to { background-position: 300% 50%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion="on"]) .uname { animation: none !important; }
+}
+html[data-motion="off"] .uname { animation: none !important; }

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Tinparatan",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Nueva pestaña, tema y arranque a tu medida. Todo se queda en este equipo.",
   "minimum_chrome_version": "120",
   "icons": {
@@ -36,6 +36,14 @@
     "alarms",
     "unlimitedStorage",
     "favicon"
+  ],
+  "optional_permissions": [
+    "history"
+  ],
+  "host_permissions": [
+    "https://suggestqueries.google.com/complete/*",
+    "https://duckduckgo.com/ac/*",
+    "https://search.brave.com/api/suggest*"
   ],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'; base-uri 'none'"

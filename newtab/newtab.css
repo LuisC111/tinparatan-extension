@@ -305,7 +305,12 @@ html[data-align-x="right"] .wordmark { justify-content: flex-end; }
 }
 .cursor { animation: tinp-blink 1.05s steps(1, end) infinite; }
 
-.search-form { animation: tinp-rise 0.8s ease 0.12s both; }
+.search-form {
+  position: relative;
+  z-index: 6;
+  animation: tinp-rise 0.8s ease 0.12s both;
+}
+.search-box { position: relative; }
 .search-form input {
   width: min(var(--search-w), calc(100vw - 48px));
   height: 52px;
@@ -399,6 +404,165 @@ html[data-search-style="square"] .search-form input { border-radius: 10px; }
 }
 .shortcut:focus-visible { outline: none; }
 html[data-align-x="left"] .shortcuts { justify-items: start; }
+
+/* Display name above the wordmark */
+.hello {
+  margin: 0 0 calc(var(--gap) * -0.55);
+  max-width: 94vw;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.45em;
+  color: var(--muted);
+  font-size: 17px;
+  letter-spacing: 0.02em;
+  animation: tinp-rise 0.8s ease both;
+  overflow: visible;
+}
+.hello[hidden] { display: none; }
+.hello-pre { font-family: var(--font-ui, inherit); opacity: 0.85; }
+.hello .uname { max-width: 80vw; overflow: visible; }
+html[data-align-x="left"] .hello { justify-content: flex-start; }
+html[data-align-x="right"] .hello { justify-content: flex-end; }
+
+/* Inline (ghost) completion, drawn under the transparent tail of the input. */
+.ghost-complete {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 23px;
+  font-size: 15px;
+  white-space: pre;
+  overflow: hidden;
+  pointer-events: none;
+  color: transparent;
+}
+.ghost-complete[hidden] { display: none; }
+.gc-rest { color: var(--placeholder); opacity: 0.9; }
+html[data-search-style="line"] .ghost-complete { padding-left: 3px; }
+
+/* Suggestions dropdown */
+.suggest {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 8px);
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  max-height: min(420px, 52vh);
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  /* Opaque on purpose: the animated form is a backdrop root, so a blur here would not see the page. */
+  background: linear-gradient(var(--search-bg), var(--search-bg)), var(--bg);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  color: var(--search-text);
+  text-align: left;
+  opacity: 0;
+  transform: translateY(-6px) scale(0.985);
+  transform-origin: 50% 0;
+  transition: opacity 0.16s ease, transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  scrollbar-width: thin;
+}
+.suggest.is-shown { opacity: 1; transform: none; }
+html[data-search-style="square"] .suggest { border-radius: 10px; }
+html[data-search-style="pill"] .suggest { border-radius: 22px; }
+.sg {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+  padding: 6px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 14.5px;
+  animation: sg-in 0.22s ease both;
+  animation-delay: calc(var(--i, 0) * 18ms);
+}
+html[data-search-style="square"] .sg { border-radius: 7px; }
+.sg.is-active {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+.sg-icon {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--search-text) 7%, transparent);
+}
+.sg.is-active .sg-icon { color: var(--accent); }
+.sg-icon .mark {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  overflow: hidden;
+  border-radius: 5px;
+}
+.sg-icon .mark img { width: 16px; height: 16px; object-fit: contain; }
+.sg-icon .mark.is-emoji { font-size: 15px; }
+.sg-badge {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  display: grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--search-bg);
+  color: var(--muted);
+}
+.sg-badge svg { width: 10px; height: 10px; }
+.sg-shortcut .sg-icon { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent); }
+.sg-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: color-mix(in srgb, var(--search-text) 72%, transparent);
+}
+.sg-text mark {
+  background: none;
+  color: var(--search-text);
+  font-weight: 650;
+}
+.sg-url .sg-text, .sg-url .sg-text mark { color: var(--accent); }
+.sg-sub {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 40%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.sg-tag {
+  flex: none;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.sg.is-active .sg-tag, .sg-shortcut .sg-tag, .sg-history .sg-tag { opacity: 0.85; }
+@keyframes sg-in {
+  from { opacity: 0; transform: translateY(-3px); }
+  to { opacity: 1; transform: none; }
+}
 
 @keyframes tinp-float {
   0%, 100% { transform: translateY(0); }

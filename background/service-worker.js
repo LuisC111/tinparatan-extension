@@ -1,5 +1,6 @@
 import { planStartupTabs, tabsNeedingReload } from "../lib/pinned.js";
 import { loadSettings } from "../lib/storage.js";
+import { buildSuggestUrl, decodeBody } from "../lib/suggest.js";
 import { clamp } from "../lib/util.js";
 
 const STARTUP_WINDOW_MS = 25000;
@@ -151,5 +152,27 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   reloadPinned({ force: message.force !== false })
     .then((count) => sendResponse({ ok: true, count }))
     .catch((error) => sendResponse({ ok: false, error: String(error) }));
+  return true;
+});
+
+// Fallback for search suggestions when the new tab page cannot fetch directly.
+// The URL is rebuilt here from the engine id, so only the three suggest endpoints are reachable.
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message?.type !== "tinp-suggest") return undefined;
+  const url = buildSuggestUrl(message.engine, String(message.query || "").slice(0, 200), message.language);
+  if (!url) {
+    sendResponse({ ok: false });
+    return undefined;
+  }
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 4000);
+  fetch(url, { signal: controller.signal, credentials: "omit", cache: "no-store" })
+    .then(async (response) => {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const text = decodeBody(await response.arrayBuffer(), response.headers.get("content-type"));
+      sendResponse({ ok: true, text });
+    })
+    .catch((error) => sendResponse({ ok: false, error: String(error) }))
+    .finally(() => clearTimeout(timer));
   return true;
 });

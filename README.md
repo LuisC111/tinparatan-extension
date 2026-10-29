@@ -1,12 +1,12 @@
 # Tinparatan
 
-Nueva pestaña, tema y arranque para [Helium](https://github.com/imputnet/helium). El escudo, el wordmark `>tinparatan_` y la búsqueda viven en una página que se abre al instante, se personaliza entera y no habla con ningún servidor.
+Nueva pestaña, tema y arranque para [Helium](https://github.com/imputnet/helium). El escudo, el wordmark `>tinparatan_` y la búsqueda viven en una página que se abre al instante, se personaliza entera y no habla con ningún servidor salvo, si las dejas activadas, las sugerencias del buscador que elijas.
 
 Todo el código, las fuentes y los medios van dentro de la extensión. Los ajustes se guardan en `chrome.storage.local`. Las imágenes, GIF, SVG y vídeos van a IndexedDB en este equipo.
 
 ## Instalar en Helium
 
-1. Descarga `tinparatan-extension.zip` y descomprímelo. Tiene que quedar una carpeta con `manifest.json` en la raíz.
+1. Descarga `tinparatan-extension-v3.zip` (o la versión más reciente) y descomprímelo. Tiene que quedar una carpeta con `manifest.json` en la raíz.
 2. Abre `helium://extensions`. Si Helium no reconoce esa dirección, usa `chrome://extensions`.
 3. Activa el **modo de desarrollador**.
 4. Pulsa **Cargar descomprimida** y elige esa carpeta. No hace falta compilar nada.
@@ -60,20 +60,25 @@ Lo que sí cubre esta extensión es todo lo que el modelo permite sin salir del 
 - Nueva pestaña con el logotipo, el wordmark en máquina de escribir y la búsqueda. El fondo oscuro está en el HTML para que no haya un destello blanco. Las animaciones respetan `prefers-reduced-motion` y el ajuste Animaciones (sistema, activadas o desactivadas). Los efectos de lienzo se pausan cuando la pestaña no se ve.
 - Ajustes con vista previa en vivo, abiertos desde el engranaje o desde el menú de la extensión. Logo propio (PNG, JPG, GIF, WebP, SVG) o ninguno. Wordmark, fuente, tamaño, color y cursor. Posición y orden. Fondos de color, gradiente, imagen, vídeo o efecto (estrellas, partículas, aurora, matrix, brasas), con desenfoque, oscurecido y brillo. Seis presets y presets guardados por ti. Búsqueda (DuckDuckGo por defecto, Google, Brave, Startpage, Bing o una URL con `%s`). Accesos directos con el icono del propio sitio (por defecto, desde la caché local de favicons del navegador; si no hay, la inicial), letra, emoji o imagen. Widgets de reloj, fecha, saludo, notas y pendientes. CSS propio. Exportar e importar un JSON. Restablecer.
 - Al arrancar el navegador, las pestañas fijadas que Chromium deja sin cargar se despiertan, con espera y escalonado. Puedes definir URL que deben existir fijadas, sin duplicar las que ya están. El botón del popup también puede recargarlas ahora.
+- **Sugerencias mientras escribes.** La barra de búsqueda propone búsquedas de Google (por defecto), DuckDuckGo o Brave, mezcladas con tus accesos directos y, si lo permites, con tu historial. Cada tipo lleva su icono, la parte que coincide va resaltada y el resto aparece en gris dentro de la barra. Teclado: ↑/↓ para moverte, Tab o → para aceptar el completado, Intro para abrir, Esc para cerrar. También con el ratón. Se ajusta en **Ajustes → Búsqueda → Motor de sugerencias** (o **Desactivado**).
+- **Nombre de usuario al estilo Discord.** «Hola, Lucho» brillando encima de `>tinparatan_`. En **Ajustes → Nombre de usuario** eliges el nombre, el tamaño, una de 12 fuentes, el efecto (Sólido, Degradado, Neón, Caricatura, Pop, Gomita o Prism), los colores o un degradado prediseñado, con una tarjeta de perfil que se actualiza al momento. **Sorpréndeme** sortea una combinación.
 - Popup con el preset, el interruptor de animaciones, la recarga y el acceso a los ajustes.
 - Textos en español. English está en `lib/locales/en.js` y se activa en Avanzado → Idioma. Añadir otro idioma es un archivo con las mismas claves.
 
-Las fuentes (JetBrains Mono, Inter, Space Grotesk, Fraunces, IBM Plex Mono) van en `assets/fonts/` bajo SIL OFL. Ver `assets/fonts/LICENSES.md`.
+Las fuentes (JetBrains Mono, Inter, Space Grotesk, Fraunces, IBM Plex Mono y, para el nombre de usuario, Montserrat, Playfair Display, UnifrakturMaguntia, Pacifico, Caveat, Fredoka, Bebas Neue, Press Start 2P, Bangers, Orbitron y Lobster) van en `assets/fonts/` bajo SIL OFL. Ver `assets/fonts/LICENSES.md`.
 
 ## Privacidad
 
-La extensión no tiene analítica, ni código remoto, ni peticiones de red propias. Buscar o abrir un acceso es una navegación normal que tú inicias. En el CSS personalizado se eliminan `@import`, `expression` y las `url()` que apuntan a internet.
+La extensión no tiene analítica ni código remoto. La única petición de red propia son las **sugerencias de búsqueda**: lo que escribes en la barra (no lo que escribes en otras webs) se envía, letra a letra con una pequeña espera, al motor elegido, igual que hace la omnibox del navegador. Con **Desactivado** no se envía nada. El historial nunca sale del equipo: se lee en local y solo si activas «Incluir mi historial», que pide el permiso en ese momento y lo devuelve al desactivarlo. Buscar o abrir un acceso es una navegación normal que tú inicias. En el CSS personalizado se eliminan `@import`, `expression` y las `url()` que apuntan a internet.
 
 Permisos:
 
 - `storage` e `unlimitedStorage`: ajustes y medios locales, también vídeos grandes.
 - `tabs`: leer las URL de las pestañas para no duplicarlas, fijarlas y recargarlas.
 - `alarms`: un segundo intento de carga por si la sesión se restaura tarde.
+- `favicon`: mostrar el icono de los sitios desde la caché local del navegador.
+- Acceso a `suggestqueries.google.com`, `duckduckgo.com/ac` y `search.brave.com/api/suggest`: solo para pedir sugerencias. Al actualizar desde una versión anterior, el navegador puede pedirte que lo apruebes.
+- `history` (opcional): solo si activas el historial en las sugerencias.
 
 ## Desarrollo
 

@@ -1,0 +1,42 @@
+{
+  "manifest_version": 3,
+  "name": "Tinparatan Theme",
+  "version": "1.0.0",
+  "description": "Marco azul noche y acento rojo para acompañar a Tinparatan. Solo recolorea la interfaz de Chromium.",
+  "icons": {
+    "48": "icon-48.png",
+    "128": "icon-128.png"
+  },
+  "theme": {
+    "colors": {
+      "frame": [7, 11, 20],
+      "frame_inactive": [12, 16, 28],
+      "frame_incognito": [28, 10, 16],
+      "frame_incognito_inactive": [22, 10, 14],
+      "toolbar": [10, 15, 26],
+      "toolbar_text": [245, 247, 251],
+      "toolbar_button_icon": [226, 230, 238],
+      "bookmark_text": [232, 236, 244],
+      "tab_text": [245, 247, 251],
+      "tab_background_text": [186, 194, 208],
+      "tab_background_text_inactive": [140, 149, 166],
+      "tab_background_text_incognito": [255, 236, 240],
+      "tab_background_text_incognito_inactive": [214, 186, 192],
+      "background_tab": [14, 19, 32],
+      "background_tab_inactive": [9, 13, 22],
+      "background_tab_incognito": [36, 14, 20],
+      "background_tab_incognito_inactive": [26, 12, 16],
+      "omnibox_background": [16, 22, 36],
+      "omnibox_text": [245, 247, 251],
+      "button_background": [22, 30, 48],
+      "ntp_background": [7, 11, 20],
+      "ntp_text": [245, 247, 251],
+      "ntp_link": [225, 29, 46]
+    },
+    "tints": {
+      "buttons": [-1, 0, 0.82],
+      "frame_inactive": [-1, -1, -1],
+      "frame_incognito_inactive": [-1, -1, -1]
+    }
+  }
+}

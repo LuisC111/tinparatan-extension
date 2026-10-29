@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="es" data-scheme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <title>Ajustes · Tinparatan</title>
+    <link rel="icon" href="../assets/icons/icon-32.png">
+    <style>html,body{margin:0;background:var(--bg,#070b14);color:var(--text,#f5f7fb)}</style>
+    <script src="../lib/boot.js"></script>
+    <link rel="stylesheet" href="../assets/tokens.css">
+    <link rel="stylesheet" href="options.css">
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <img src="../assets/logo.png" alt="">
+          <div>
+            <strong>Tinparatan</strong>
+            <span data-i18n="options.title">Ajustes</span>
+          </div>
+        </div>
+        <nav class="nav" data-i18n-aria="options.navLabel" aria-label="Secciones">
+          <button type="button" data-goto="apariencia" data-i18n="nav.appearance">Apariencia</button>
+          <button type="button" data-goto="logotipo" data-i18n="nav.logo">Logotipo</button>
+          <button type="button" data-goto="wordmark" data-i18n="nav.wordmark">Wordmark</button>
+          <button type="button" data-goto="disposicion" data-i18n="nav.layout">Disposición</button>
+          <button type="button" data-goto="fondo" data-i18n="nav.background">Fondo</button>
+          <button type="button" data-goto="busqueda" data-i18n="nav.search">Búsqueda</button>
+          <button type="button" data-goto="accesos" data-i18n="nav.shortcuts">Accesos</button>
+          <button type="button" data-goto="widgets" data-i18n="nav.widgets">Widgets</button>
+          <button type="button" data-goto="fijadas" data-i18n="nav.pinned">Pestañas fijadas</button>
+          <button type="button" data-goto="avanzado" data-i18n="nav.advanced">Avanzado</button>
+        </nav>
+      </aside>
+      <main class="main">
+        <section class="section" id="apariencia">
+          <h2 data-i18n="sections.appearance.title">Apariencia</h2>
+          <p class="lede" data-i18n="sections.appearance.desc"></p>
+          <div class="presets" id="preset-grid"></div>
+          <div class="card">
+            <h3 data-i18n="presets.yours">Tus presets</h3>
+            <div class="preset-row">
+              <input id="preset-name" type="text" maxlength="40" data-i18n-placeholder="presets.name" placeholder="Nombre del preset">
+              <button type="button" class="btn btn-primary" id="save-preset" data-i18n="presets.save">Guardar preset</button>
+            </div>
+            <div class="user-presets" id="user-presets"></div>
+            <p class="hint" id="user-presets-empty" data-i18n="presets.empty"></p>
+          </div>
+          <div class="card">
+            <h3 data-i18n="motion.label">Animaciones</h3>
+            <div class="segmented" role="radiogroup" data-i18n-aria="motion.label">
+              <label><input type="radio" name="motion" value="system" data-bind="motion"><span data-i18n="motion.system">Sistema</span></label>
+              <label><input type="radio" name="motion" value="on" data-bind="motion"><span data-i18n="motion.on">Activadas</span></label>
+              <label><input type="radio" name="motion" value="off" data-bind="motion"><span data-i18n="motion.off">Desactivadas</span></label>
+            </div>
+            <p class="hint" data-i18n="motion.hint"></p>
+          </div>
+          <div class="card">
+            <div class="grid-2">
+              <label class="field"><span data-i18n="fields.accent"></span><input type="color" data-bind="theme.accent" data-visual="1"></label>
+              <label class="field"><span data-i18n="fields.background"></span><input type="color" data-bind="theme.background" data-visual="1"></label>
+              <label class="field"><span data-i18n="fields.text"></span><input type="color" data-bind="theme.text" data-visual="1"></label>
+              <label class="field"><span data-i18n="fields.wordmark"></span><input type="color" data-bind="theme.wordmark" data-visual="1"></label>
+            </div>
+            <details>
+              <summary data-i18n="fields.moreColors">Más colores</summary>
+              <div class="grid-2" style="margin-top:12px">
+                <label class="field"><span data-i18n="fields.prompt"></span><input type="color" data-bind="theme.prompt" data-visual="1"></label>
+                <label class="field"><span data-i18n="fields.muted"></span><input type="color" data-bind="theme.muted" data-visual="1"></label>
+                <label class="field"><span data-i18n="fields.surface"></span><input type="color" data-bind="theme.surface" data-visual="1"></label>
+                <label class="field"><span data-i18n="fields.searchText"></span><input type="color" data-bind="theme.searchText" data-visual="1"></label>
+                <label class="field"><span data-i18n="fields.placeholder"></span><input type="color" data-bind="theme.placeholder" data-visual="1"></label>
+                <label class="field"><span data-i18n="fields.searchBg"></span><input type="text" data-bind="theme.searchBg" data-visual="1" spellcheck="false"></label>
+              </div>
+              <label class="field" style="margin-top:12px">
+                <span class="field-head"><span data-i18n="fields.vignette"></span><span class="val" data-val="theme.vignette"></span></span>
+                <input type="range" min="0" max="0.85" step="0.01" data-bind="theme.vignette" data-kind="number" data-visual="1">
+              </label>
+            </details>
+          </div>
+        </section>
+
+        <section class="section" id="logotipo">
+          <h2 data-i18n="sections.logo.title"></h2>
+          <p class="lede" data-i18n="sections.logo.desc"></p>
+          <div class="card">
+            <div class="segmented" role="radiogroup">
+              <label><input type="radio" name="logo-mode" value="default" data-bind="logo.mode" data-visual="1"><span data-i18n="fields.logoDefault"></span></label>
+              <label><input type="radio" name="logo-mode" value="custom" data-bind="logo.mode" data-visual="1"><span data-i18n="fields.logoCustom"></span></label>
+              <label><input type="radio" name="logo-mode" value="none" data-bind="logo.mode" data-visual="1"><span data-i18n="fields.logoNone"></span></label>
+            </div>
+            <div class="inline" data-show-logo="custom">
+              <label class="file-btn"><input id="logo-file" type="file" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml,.svg"><span data-i18n="fields.upload"></span></label>
+              <button type="button" class="btn" id="logo-remove" data-i18n="fields.remove"></button>
+            </div>
+            <p class="hint" data-i18n="fields.logoHint"></p>
+            <label class="field">
+              <span class="field-head"><span data-i18n="fields.logoSize"></span><span class="val" data-val="logo.size" data-suffix="px"></span></span>
+              <input type="range" min="72" max="320" step="2" data-bind="logo.size" data-kind="number" data-visual="1">
+            </label>
+            <label class="check"><input type="checkbox" data-bind="logo.glow" data-visual="1"><span data-i18n="fields.glow"></span></label>
+            <label class="check"><input type="checkbox" data-bind="logo.float" data-visual="1"><span data-i18n="fields.float"></span></label>
+          </div>
+        </section>
+
+        <section class="section" id="wordmark">
+          <h2 data-i18n="sections.wordmark.title"></h2>
+          <p class="lede" data-i18n="sections.wordmark.desc"></p>
+          <div class="card">
+            <label class="field"><span data-i18n="fields.wmText"></span><input type="text" maxlength="48" data-bind="wordmark.text" data-visual="1" spellcheck="false"></label>
+            <div class="grid-2">
+              <label class="check"><input type="checkbox" data-bind="wordmark.showPrompt" data-visual="1"><span data-i18n="fields.showPrompt"></span></label>
+              <label class="field"><span data-i18n="fields.promptChar"></span><input type="text" maxlength="2" data-bind="wordmark.prompt" data-visual="1"></label>
+            </div>
+            <label class="field">
+              <span data-i18n="fields.cursor"></span>
+              <select data-bind="wordmark.cursorStyle" data-visual="1">
+                <option value="underscore" data-i18n="fields.cursorUnderscore"></option>
+                <option value="block" data-i18n="fields.cursorBlock"></option>
+                <option value="bar" data-i18n="fields.cursorBar"></option>
+                <option value="none" data-i18n="fields.cursorNone"></option>
+              </select>
+            </label>
+            <label class="check"><input type="checkbox" data-bind="wordmark.showCursor" data-visual="1"><span data-i18n="fields.cursor"></span></label>
+            <label class="field">
+              <span data-i18n="fields.font"></span>
+              <select data-bind="wordmark.fontId" data-visual="1" id="font-select">
+                <option value="jetbrains-mono" data-i18n="fonts.jetbrains-mono"></option>
+                <option value="ibm-plex-mono" data-i18n="fonts.ibm-plex-mono"></option>
+                <option value="space-grotesk" data-i18n="fonts.space-grotesk"></option>
+                <option value="inter" data-i18n="fonts.inter"></option>
+                <option value="fraunces" data-i18n="fonts.fraunces"></option>
+                <option value="system-sans" data-i18n="fonts.system-sans"></option>
+                <option value="system-mono" data-i18n="fonts.system-mono"></option>
+              </select>
+            </label>
+            <div class="grid-2">
+              <label class="field">
+                <span class="field-head"><span data-i18n="fields.fontSize"></span><span class="val" data-val="wordmark.fontSize" data-suffix="px"></span></span>
+                <input type="range" min="24" max="84" step="1" data-bind="wordmark.fontSize" data-kind="number" data-visual="1">
+              </label>
+              <label class="field">
+                <span class="field-head"><span data-i18n="fields.fontWeight"></span><span class="val" data-val="wordmark.fontWeight"></span></span>
+                <input type="range" min="400" max="700" step="50" data-bind="wordmark.fontWeight" data-kind="number" data-visual="1">
+              </label>
+              <label class="field">
+                <span class="field-head"><span data-i18n="fields.tracking"></span><span class="val" data-val="wordmark.letterSpacing" data-suffix="px"></span></span>
+                <input type="range" min="-2" max="8" step="0.1" data-bind="wordmark.letterSpacing" data-kind="number" data-visual="1">
+              </label>
+              <label class="field">
+                <span class="field-head"><span data-i18n="fields.typingMs"></span><span class="val" data-val="wordmark.typingMs" data-suffix="ms"></span></span>
+                <input type="range" min="30" max="180" step="1" data-bind="wordmark.typingMs" data-kind="number" data-visual="1">
+              </label>
+            </div>
+            <label class="check"><input type="checkbox" data-bind="wordmark.typing" data-visual="1"><span data-i18n="fields.typing"></span></label>
+          </div>
+        </section>
+
+        <section class="section" id="disposicion">
+          <h2 data-i18n="sections.layout.title"></h2>
+          <p class="lede" data-i18n="sections.layout.desc"></p>
+          <div class="card">
+            <div class="field">
+              <span data-i18n="fields.alignX"></span>
+              <div class="segmented">
+                <label><input type="radio" name="align-x" value="left" data-bind="layout.alignX" data-visual="1"><span data-i18n="fields.left"></span></label>
+                <label><input type="radio" name="align-x" value="center" data-bind="layout.alignX" data-visual="1"><span data-i18n="fields.center"></span></label>
+                <label><input type="radio" name="align-x" value="right" data-bind="layout.alignX" data-visual="1"><span data-i18n="fields.right"></span></label>
+              </div>
+            </div>
+            <div class="field">
+              <span data-i18n="fields.alignY"></span>
+              <div class="segmented">
+                <label><input type="radio" name="align-y" value="start" data-bind="layout.alignY" data-visual="1"><span data-i18n="fields.top"></span></label>
+                <label><input type="radio" name="align-y" value="center" data-bind="layout.alignY" data-visual="1"><span data-i18n="fields.middle"></span></label>
+                <label><input type="radio" name="align-y" value="end" data-bind="layout.alignY" data-visual="1"><span data-i18n="fields.bottom"></span></label>
+              </div>
+            </div>
+            <label class="field">
+              <span class="field-head"><span data-i18n="fields.gap"></span><span class="val" data-val="layout.gap" data-suffix="px"></span></span>
+              <input type="range" min="0" max="72" step="1" data-bind="layout.gap" data-kind="number" data-visual="1">
+            </label>
+            <label class="field">
+              <span class="field-head"><span data-i18n="fields.offsetY"></span><span class="val" data-val="layout.offsetY"></span></span>
+              <input type="range" min="-18" max="18" step="1" data-bind="layout.offsetY" data-kind="number" data-visual="1">
+            </label>
+            <div>
+              <span class="hint" data-i18n="fields.order"></span>
+              <div id="order-list"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="fondo">
+          <h2 data-i18n="sections.background.title"></h2>
+          <p class="lede" data-i18n="sections.background.desc"></p>
+          <div class="card">
+            <div class="segmented">
+              <label><input type="radio" name="bg-type" value="solid" data-bind="background.type" data-visual="1"><span data-i18n="fields.solid"></span></label>
+              <label><input type="radio" name="bg-type" value="gradient" data-bind="background.type" data-visual="1"><span data-i18n="fields.gradient"></span></label>
+              <label><input type="radio" name="bg-type" value="image" data-bind="background.type" data-visual="1"><span data-i18n="fields.image"></span></label>
+              <label><input type="radio" name="bg-type" value="video" data-bind="background.type" data-visual="1"><span data-i18n="fields.video"></span></label>
+              <label><input type="radio" name="bg-type" value="effect" data-bind="background.type" data-visual="1"><span data-i18n="fields.effect"></span></label>
+            </div>
+            <div data-show-bg="gradient,effect" class="grid-2">
+              <label class="field"><span data-i18n="fields.color"></span><input type="color" data-bind="background.gradient.colors.0" data-visual="1"></label>
+              <label class="field"><span data-i18n="fields.color"></span><input type="color" data-bind="background.gradient.colors.1" data-visual="1"></label>
+              <label class="field"><span data-i18n="fields.color"></span><input type="color" data-bind="background.gradient.colors.2" data-visual="1"></label>
+              <label class="field">
+                <span class="field-head"><span data-i18n="fields.angle"></span><span class="val" data-val="background.gradient.angle" data-suffix="°"></span></span>
+                <input type="range" min="0" max="360" step="1" data-bind="background.gradient.angle" data-kind="number" data-visual="1">
+              </label>
+            </div>
+            <label class="check" data-show-bg="gradient"><input type="checkbox" data-bind="background.gradient.animate" data-visual="1"><span data-i18n="fields.animateGradient"></span></label>
+            <div class="choice-grid" data-show-bg="effect">
+              <label class="choice"><input type="radio" name="effect" value="stars" data-bind="background.effect" data-visual="1"><span data-i18n="effects.stars"></span></label>
+              <label class="choice"><input type="radio" name="effect" value="particles" data-bind="background.effect" data-visual="1"><span data-i18n="effects.particles"></span></label>
+              <label class="choice"><input type="radio" name="effect" value="aurora" data-bind="background.effect" data-visual="1"><span data-i18n="effects.aurora"></span></label>
+              <label class="choice"><input type="radio" name="effect" value="matrix" data-bind="background.effect" data-visual="1"><span data-i18n="effects.matrix"></span></label>
+              <label class="choice"><input type="radio" name="effect" value="embers" data-bind="background.effect" data-visual="1"><span data-i18n="effects.embers"></span></label>
+            </div>
+            <label class="field" data-show-bg="effect">
+              <span class="field-head"><span data-i18n="fields.intensity"></span><span class="val" data-val="background.intensity"></span></span>
+              <input type="range" min="0.2" max="1" step="0.01" data-bind="background.intensity" data-kind="number" data-visual="1">
+            </label>
+            <div class="inline" data-show-bg="image">
+              <label class="file-btn"><input id="bg-image-file" type="file" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml,.svg"><span data-i18n="fields.upload"></span></label>
+              <button type="button" class="btn" id="bg-image-remove" data-i18n="fields.remove"></button>
+            </div>
+            <div class="inline" data-show-bg="video">
+              <label class="file-btn"><input id="bg-video-file" type="file" accept="video/mp4,video/webm,video/ogg"><span data-i18n="fields.upload"></span></label>
+              <button type="button" class="btn" id="bg-video-remove" data-i18n="fields.remove"></button>
+            </div>
+            <p class="hint" data-show-bg="image,video" data-i18n="fields.mediaHint"></p>
+            <div class="segmented" data-show-bg="image,video">
+              <label><input type="radio" name="fit" value="cover" data-bind="background.fit" data-visual="1"><span data-i18n="fields.cover"></span></label>
+              <label><input type="radio" name="fit" value="contain" data-bind="background.fit" data-visual="1"><span data-i18n="fields.contain"></span></label>
+            </div>
+            <label class="field" data-show-bg="image,video">
+              <span class="field-head"><span data-i18n="fields.blur"></span><span class="val" data-val="background.blur" data-suffix="px"></span></span>
+              <input type="range" min="0" max="24" step="1" data-bind="background.blur" data-kind="number" data-visual="1">
+            </label>
+            <label class="field" data-show-bg="image,video,effect,gradient">
+              <span class="field-head"><span data-i18n="fields.dim"></span><span class="val" data-val="background.dim"></span></span>
+              <input type="range" min="0" max="0.8" step="0.01" data-bind="background.dim" data-kind="number" data-visual="1">
+            </label>
+            <label class="field" data-show-bg="image,video">
+              <span class="field-head"><span data-i18n="fields.brightness"></span><span class="val" data-val="background.brightness"></span></span>
+              <input type="range" min="0.4" max="1.4" step="0.01" data-bind="background.brightness" data-kind="number" data-visual="1">
+            </label>
+          </div>
+        </section>
+
+        <section class="section" id="busqueda">
+          <h2 data-i18n="sections.search.title"></h2>
+          <p class="lede" data-i18n="sections.search.desc"></p>
+          <div class="card">
+            <label class="check"><input type="checkbox" data-bind="search.enabled"><span data-i18n="fields.searchEnabled"></span></label>
+            <label class="field">
+              <span data-i18n="fields.engine"></span>
+              <select data-bind="search.engine" id="engine-select">
+                <option value="duckduckgo" data-i18n="engines.duckduckgo"></option>
+                <option value="google" data-i18n="engines.google"></option>
+                <option value="brave" data-i18n="engines.brave"></option>
+                <option value="startpage" data-i18n="engines.startpage"></option>
+                <option value="bing" data-i18n="engines.bing"></option>
+                <option value="custom" data-i18n="engines.custom"></option>
+              </select>
+            </label>
+            <label class="field" data-show-engine="custom">
+              <span data-i18n="fields.customUrl"></span>
+              <input type="url" data-bind="search.customUrl" spellcheck="false" placeholder="https://duckduckgo.com/?q=%s">
+              <span class="hint" data-i18n="fields.customUrlHint"></span>
+            </label>
+            <label class="field">
+              <span data-i18n="fields.placeholderCustom"></span>
+              <input type="text" maxlength="80" data-bind="search.placeholder">
+              <span class="hint" data-i18n="fields.placeholderHint"></span>
+            </label>
+            <div class="field">
+              <span data-i18n="fields.searchStyle"></span>
+              <div class="segmented">
+                <label><input type="radio" name="search-style" value="pill" data-bind="search.style" data-visual="1"><span data-i18n="fields.stylePill"></span></label>
+                <label><input type="radio" name="search-style" value="glass" data-bind="search.style" data-visual="1"><span data-i18n="fields.styleGlass"></span></label>
+                <label><input type="radio" name="search-style" value="line" data-bind="search.style" data-visual="1"><span data-i18n="fields.styleLine"></span></label>
+                <label><input type="radio" name="search-style" value="square" data-bind="search.style" data-visual="1"><span data-i18n="fields.styleSquare"></span></label>
+              </div>
+            </div>
+            <label class="field">
+              <span class="field-head"><span data-i18n="fields.searchWidth"></span><span class="val" data-val="search.width" data-suffix="px"></span></span>
+              <input type="range" min="280" max="820" step="10" data-bind="search.width" data-kind="number" data-visual="1">
+            </label>
+            <div class="field">
+              <span data-i18n="fields.openIn"></span>
+              <div class="segmented">
+                <label><input type="radio" name="open-in" value="current" data-bind="search.openIn"><span data-i18n="fields.openCurrent"></span></label>
+                <label><input type="radio" name="open-in" value="tab" data-bind="search.openIn"><span data-i18n="fields.openTab"></span></label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="accesos">
+          <h2 data-i18n="sections.shortcuts.title"></h2>
+          <p class="lede" data-i18n="sections.shortcuts.desc"></p>
+          <div class="card">
+            <label class="check"><input type="checkbox" data-bind="shortcuts.enabled"><span data-i18n="fields.shortcutsEnabled"></span></label>
+            <label class="field">
+              <span class="field-head"><span data-i18n="fields.columns"></span><span class="val" data-val="shortcuts.columns"></span></span>
+              <input type="range" min="2" max="8" step="1" data-bind="shortcuts.columns" data-kind="number">
+            </label>
+            <div id="shortcut-list"></div>
+            <p class="hint" id="shortcut-empty" data-i18n="fields.noShortcuts"></p>
+            <button type="button" class="btn" id="add-shortcut" data-i18n="fields.addShortcut"></button>
+          </div>
+        </section>
+
+        <section class="section" id="widgets">
+          <h2 data-i18n="sections.widgets.title"></h2>
+          <p class="lede" data-i18n="sections.widgets.desc"></p>
+          <div class="card">
+            <h3 data-i18n="fields.clock"></h3>
+            <label class="check"><input type="checkbox" data-bind="widgets.clock.enabled"><span data-i18n="fields.enabled"></span></label>
+            <label class="check"><input type="checkbox" data-bind="widgets.clock.format24"><span data-i18n="fields.format24"></span></label>
+            <label class="check"><input type="checkbox" data-bind="widgets.clock.seconds"><span data-i18n="fields.seconds"></span></label>
+            <label class="field"><span data-i18n="fields.position"></span><select data-bind="widgets.clock.position" data-positions></select></label>
+          </div>
+          <div class="card">
+            <h3 data-i18n="fields.date"></h3>
+            <label class="check"><input type="checkbox" data-bind="widgets.date.enabled"><span data-i18n="fields.enabled"></span></label>
+            <label class="field"><span data-i18n="fields.position"></span><select data-bind="widgets.date.position" data-positions></select></label>
+          </div>
+          <div class="card">
+            <h3 data-i18n="fields.greeting"></h3>
+            <label class="check"><input type="checkbox" data-bind="widgets.greeting.enabled"><span data-i18n="fields.enabled"></span></label>
+            <label class="field"><span data-i18n="fields.yourName"></span><input type="text" maxlength="40" data-bind="widgets.greeting.name"><span class="hint" data-i18n="fields.nameHint"></span></label>
+            <label class="field"><span data-i18n="fields.position"></span><select data-bind="widgets.greeting.position" data-positions></select></label>
+          </div>
+          <div class="card">
+            <h3 data-i18n="fields.notes"></h3>
+            <label class="check"><input type="checkbox" data-bind="widgets.notes.enabled"><span data-i18n="fields.enabled"></span></label>
+            <label class="field"><span data-i18n="fields.position"></span><select data-bind="widgets.notes.position" data-positions></select></label>
+          </div>
+          <div class="card">
+            <h3 data-i18n="fields.todo"></h3>
+            <label class="check"><input type="checkbox" data-bind="widgets.todo.enabled"><span data-i18n="fields.enabled"></span></label>
+            <label class="field"><span data-i18n="fields.position"></span><select data-bind="widgets.todo.position" data-positions></select></label>
+          </div>
+        </section>
+
+        <section class="section" id="fijadas">
+          <h2 data-i18n="sections.pinned.title"></h2>
+          <p class="lede" data-i18n="sections.pinned.desc"></p>
+          <div class="card">
+            <label class="check"><input type="checkbox" data-bind="pinnedTabs.reloadOnStartup"><span data-i18n="fields.reloadOnStartup"></span></label>
+            <label class="field">
+              <span class="field-head"><span data-i18n="fields.delay"></span><span class="val" data-val="pinnedTabs.delayMs" data-suffix="ms"></span></span>
+              <input type="range" min="0" max="8000" step="50" data-bind="pinnedTabs.delayMs" data-kind="number">
+            </label>
+            <label class="field">
+              <span class="field-head"><span data-i18n="fields.stagger"></span><span class="val" data-val="pinnedTabs.staggerMs" data-suffix="ms"></span></span>
+              <input type="range" min="0" max="2000" step="20" data-bind="pinnedTabs.staggerMs" data-kind="number">
+            </label>
+            <button type="button" class="btn" id="reload-now" data-i18n="fields.reloadNow"></button>
+            <h3 data-i18n="fields.startupUrls"></h3>
+            <p class="hint" data-i18n="fields.startupHint"></p>
+            <div id="url-list"></div>
+            <div class="inline">
+              <input id="url-draft" type="url" data-i18n-placeholder="fields.urlPlaceholder" placeholder="https://ejemplo.com">
+              <button type="button" class="btn" id="add-url" data-i18n="fields.addUrl"></button>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="avanzado">
+          <h2 data-i18n="sections.advanced.title"></h2>
+          <p class="lede" data-i18n="sections.advanced.desc"></p>
+          <div class="card">
+            <label class="field">
+              <span data-i18n="fields.locale"></span>
+              <select data-bind="locale">
+                <option value="es">Español</option>
+                <option value="en">English</option>
+              </select>
+              <span class="hint" data-i18n="fields.localeHint"></span>
+            </label>
+            <label class="field">
+              <span data-i18n="fields.customCss"></span>
+              <textarea data-bind="customCss" spellcheck="false"></textarea>
+              <span class="hint" data-i18n="fields.cssHint"></span>
+            </label>
+            <p class="hint" data-i18n="fields.exportHint"></p>
+            <div class="actions">
+              <button type="button" class="btn" id="export-btn" data-i18n="fields.export"></button>
+              <label class="file-btn"><input id="import-file" type="file" accept="application/json,.json"><span data-i18n="fields.import"></span></label>
+              <button type="button" class="btn btn-danger" id="reset-btn" data-i18n="fields.reset"></button>
+            </div>
+          </div>
+          <p class="status" id="status" role="status" data-i18n="options.saved"></p>
+        </section>
+      </main>
+      <aside class="preview-col">
+        <h2 data-i18n="options.preview">Vista previa</h2>
+        <p class="hint" data-i18n="options.previewHint"></p>
+        <div class="preview-scale" id="preview-scale">
+          <iframe id="preview" title="Vista previa de la nueva pestaña"></iframe>
+        </div>
+      </aside>
+    </div>
+    <dialog id="confirm">
+      <h3 id="confirm-title"></h3>
+      <p id="confirm-body"></p>
+      <form method="dialog">
+        <button class="btn" value="cancel" data-i18n="fields.cancel">Cancelar</button>
+        <button class="btn btn-danger" id="confirm-ok" value="ok">OK</button>
+      </form>
+    </dialog>
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

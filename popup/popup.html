@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tinparatan</title>
+    <link rel="stylesheet" href="../assets/tokens.css">
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <header class="brand">
+      <img src="../assets/logo.png" alt="">
+      <div>
+        <strong>Tinparatan</strong>
+        <span data-i18n="app.tagline">Tu navegador, en este equipo.</span>
+      </div>
+    </header>
+    <label class="field">
+      <span data-i18n="popup.presets">Preset</span>
+      <select id="preset"></select>
+    </label>
+    <label class="switch">
+      <input id="motion" type="checkbox">
+      <span data-i18n="popup.animations">Animaciones</span>
+    </label>
+    <button type="button" class="btn" id="reload" data-i18n="popup.reload">Recargar pestañas fijadas</button>
+    <button type="button" class="btn btn-primary" id="settings" data-i18n="popup.settings">Abrir ajustes</button>
+    <p class="status" id="status" role="status"></p>
+    <p class="fine" data-i18n="popup.local">Todo queda en este equipo.</p>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es" data-motion="system" data-bg="solid" data-search-style="pill" data-glow="1" data-float="1" data-align-x="center" data-align-y="center" data-scheme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <title>Tinparatan</title>
+    <link rel="icon" href="../assets/icons/icon-32.png">
+    <style>html,body{margin:0;height:100%;background:var(--bg,#070b14);color:var(--text,#f5f7fb)}</style>
+    <script src="../lib/boot.js"></script>
+    <link rel="stylesheet" href="../assets/tokens.css">
+    <link rel="stylesheet" href="newtab.css">
+  </head>
+  <body>
+    <div id="bg" aria-hidden="true">
+      <div class="bg-base"></div>
+      <div class="bg-gradient"></div>
+      <img class="bg-image" alt="">
+      <video class="bg-video" muted loop playsinline></video>
+      <div class="aurora"><span></span><span></span><span></span></div>
+      <canvas id="fx" hidden></canvas>
+      <div class="noise"></div>
+      <div class="vignette"></div>
+      <div class="scrim"></div>
+    </div>
+    <header class="topbar">
+      <button type="button" id="settings-btn" class="icon-btn" data-i18n-aria="ntp.settings" aria-label="Ajustes">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+          <circle cx="12" cy="12" r="3"></circle>
+        </svg>
+      </button>
+    </header>
+    <div id="slots">
+      <div class="slot slot-top-left" data-slot="top-left"></div>
+      <div class="slot slot-top-center" data-slot="top-center"></div>
+      <div class="slot slot-top-right" data-slot="top-right"></div>
+      <div class="slot slot-bottom-left" data-slot="bottom-left"></div>
+      <div class="slot slot-bottom-center" data-slot="bottom-center"></div>
+      <div class="slot slot-bottom-right" data-slot="bottom-right"></div>
+    </div>
+    <main id="stage">
+      <div id="stack">
+        <div class="logo-wrap" id="logo-wrap">
+          <img id="logo" class="logo-img" src="../assets/logo.png" alt="">
+        </div>
+        <h1 class="wordmark" id="wordmark">
+          <span class="sr-only" id="wm-sr">tinparatan</span>
+          <span class="prompt" id="wm-prompt" aria-hidden="true">&gt;</span><span class="wm-line" aria-hidden="true">
+            <span class="ghost" id="wm-ghost">tinparatan</span>
+            <span class="live"><span id="wm-typed"></span><span class="cursor" id="wm-cursor">_</span></span>
+          </span>
+        </h1>
+        <form id="search-form" class="search-form" role="search">
+          <label class="sr-only" for="q" data-i18n="ntp.searchLabel">Buscar o escribir una dirección</label>
+          <input id="q" name="q" type="search" autocomplete="off" spellcheck="false" autocapitalize="off" enterkeyhint="search" placeholder="Buscar o escribir dirección">
+        </form>
+        <nav id="shortcuts" class="shortcuts" aria-label="Accesos" hidden></nav>
+      </div>
+    </main>
+    <style id="custom-css"></style>
+    <script type="module" src="newtab.js"></script>
+  </body>
+</html>

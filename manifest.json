@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Tinparatan",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Nueva pestaña, tema y arranque a tu medida. Todo se queda en este equipo.",
   "minimum_chrome_version": "120",
   "icons": {
@@ -30,7 +30,13 @@
     "service_worker": "background/service-worker.js",
     "type": "module"
   },
-  "permissions": ["storage", "tabs", "alarms", "unlimitedStorage"],
+  "permissions": [
+    "storage",
+    "tabs",
+    "alarms",
+    "unlimitedStorage",
+    "favicon"
+  ],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'; base-uri 'none'"
   }

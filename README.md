@@ -23,7 +23,7 @@ Si sigues viendo la página de inicio de Helium:
 
 ## Tema del marco
 
-Una extensión no puede recolorear la barra, las pestañas ni el marco. Eso solo lo hace un tema de Chromium. `themes/tinparatan-theme` (o `tinparatan-theme.zip`) usa el azul noche y el rojo del escudo.
+Una extensión no puede recolorear la barra, las pestañas ni el marco. Eso solo lo hace un tema de Chromium, que se carga como su propia extensión descomprimida (solo hay un tema activo a la vez). Hay dos incluidos: `themes/tinparatan-theme` (azul noche y rojo del escudo) y `themes/tinparatan-noir` (marco casi negro con brillo rojo e imágenes). En **Ajustes → Tema del navegador** puedes descargar cualquiera de los dos como `.zip`, o **generar** uno con los colores de tu preset actual, y abrir la página de extensiones con un clic.
 
 1. Descomprime el zip del tema, o entra en la carpeta `themes/tinparatan-theme` del repositorio.
 2. En `helium://extensions`, con el modo de desarrollador activo, **Cargar descomprimida** y elige esa carpeta (la que contiene su propio `manifest.json`).
@@ -58,7 +58,7 @@ Lo que sí cubre esta extensión es todo lo que el modelo permite sin salir del 
 ## Qué incluye
 
 - Nueva pestaña con el logotipo, el wordmark en máquina de escribir y la búsqueda. El fondo oscuro está en el HTML para que no haya un destello blanco. Las animaciones respetan `prefers-reduced-motion` y el ajuste Animaciones (sistema, activadas o desactivadas). Los efectos de lienzo se pausan cuando la pestaña no se ve.
-- Ajustes con vista previa en vivo, abiertos desde el engranaje o desde el menú de la extensión. Logo propio (PNG, JPG, GIF, WebP, SVG) o ninguno. Wordmark, fuente, tamaño, color y cursor. Posición y orden. Fondos de color, gradiente, imagen, vídeo o efecto (estrellas, partículas, aurora, matrix, brasas), con desenfoque, oscurecido y brillo. Seis presets y presets guardados por ti. Búsqueda (DuckDuckGo por defecto, Google, Brave, Startpage, Bing o una URL con `%s`). Accesos directos. Widgets de reloj, fecha, saludo, notas y pendientes. CSS propio. Exportar e importar un JSON. Restablecer.
+- Ajustes con vista previa en vivo, abiertos desde el engranaje o desde el menú de la extensión. Logo propio (PNG, JPG, GIF, WebP, SVG) o ninguno. Wordmark, fuente, tamaño, color y cursor. Posición y orden. Fondos de color, gradiente, imagen, vídeo o efecto (estrellas, partículas, aurora, matrix, brasas), con desenfoque, oscurecido y brillo. Seis presets y presets guardados por ti. Búsqueda (DuckDuckGo por defecto, Google, Brave, Startpage, Bing o una URL con `%s`). Accesos directos con el icono del propio sitio (por defecto, desde la caché local de favicons del navegador; si no hay, la inicial), letra, emoji o imagen. Widgets de reloj, fecha, saludo, notas y pendientes. CSS propio. Exportar e importar un JSON. Restablecer.
 - Al arrancar el navegador, las pestañas fijadas que Chromium deja sin cargar se despiertan, con espera y escalonado. Puedes definir URL que deben existir fijadas, sin duplicar las que ya están. El botón del popup también puede recargarlas ahora.
 - Popup con el preset, el interruptor de animaciones, la recarga y el acceso a los ajustes.
 - Textos en español. English está en `lib/locales/en.js` y se activa en Avanzado → Idioma. Añadir otro idioma es un archivo con las mismas claves.

@@ -1,6 +1,7 @@
 import { sanitizeCss } from "../lib/css-sanitize.js";
 import { applyI18n, setLocale, t } from "../lib/i18n.js";
 import { mediaUrl } from "../lib/media-db.js";
+import { paintShortcutMark } from "../lib/shortcut-icon.js";
 import { motionAllowed } from "../lib/motion.js";
 import { normalizeNotes, normalizeSettings, normalizeTodos } from "../lib/normalize.js";
 import { writePaint } from "../lib/paint.js";
@@ -268,8 +269,13 @@ async function syncMedia() {
   }
 }
 
-async function renderShortcuts() {
+let shortcutsToken = 0;
+
+function renderShortcuts() {
   const config = settingsRef.shortcuts;
+  // Each render gets a token; icon loads from an older render never touch the new grid.
+  shortcutsToken += 1;
+  const token = shortcutsToken;
   shortcutsEl.hidden = !config.enabled || config.items.length === 0;
   shortcutsEl.replaceChildren();
   if (shortcutsEl.hidden) return;
@@ -279,27 +285,18 @@ async function renderShortcuts() {
     const link = document.createElement("a");
     link.className = "shortcut";
     link.href = href;
+    link.dataset.iconType = item.iconType;
     const mark = el("span", "mark");
-    if (item.color) mark.style.color = item.color;
-    if (item.iconType === "image" && item.iconId) {
-      const url = await mediaUrl(item.iconId);
-      if (url) {
-        const img = document.createElement("img");
-        img.alt = "";
-        img.src = url;
-        mark.append(img);
-      } else {
-        mark.textContent = (item.title || "?").slice(0, 1).toUpperCase();
-      }
-    } else if (item.iconType === "emoji" && item.emoji) {
-      mark.textContent = item.emoji;
-    } else {
-      mark.textContent = (item.title || href).slice(0, 1).toUpperCase();
-    }
     const label = document.createElement("span");
-    label.textContent = item.title || href.replace(/^https?:\/\//, "");
+    label.className = "label";
+    label.textContent = item.title || href.replace(/^https?:\/\//, "").replace(/\/$/, "");
     link.append(mark, label);
     shortcutsEl.append(link);
+    paintShortcutMark(mark, item, { isCurrent: () => token === shortcutsToken })
+      .then((drawn) => {
+        if (drawn !== "stale") link.dataset.drawn = drawn;
+      })
+      .catch(() => {});
   }
   shortcutsEl.hidden = shortcutsEl.childElementCount === 0;
 }

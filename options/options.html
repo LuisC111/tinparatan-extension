@@ -30,6 +30,7 @@
           <button type="button" data-goto="busqueda" data-i18n="nav.search">Búsqueda</button>
           <button type="button" data-goto="accesos" data-i18n="nav.shortcuts">Accesos</button>
           <button type="button" data-goto="widgets" data-i18n="nav.widgets">Widgets</button>
+          <button type="button" data-goto="tema-navegador" data-i18n="nav.browserTheme">Tema del navegador</button>
           <button type="button" data-goto="fijadas" data-i18n="nav.pinned">Pestañas fijadas</button>
           <button type="button" data-goto="avanzado" data-i18n="nav.advanced">Avanzado</button>
         </nav>
@@ -347,6 +348,38 @@
             <h3 data-i18n="fields.todo"></h3>
             <label class="check"><input type="checkbox" data-bind="widgets.todo.enabled"><span data-i18n="fields.enabled"></span></label>
             <label class="field"><span data-i18n="fields.position"></span><select data-bind="widgets.todo.position" data-positions></select></label>
+          </div>
+        </section>
+
+        <section class="section" id="tema-navegador">
+          <h2 data-i18n="sections.browserTheme.title"></h2>
+          <p class="lede" data-i18n="sections.browserTheme.desc"></p>
+          <div class="card">
+            <h3 data-i18n="browserTheme.generateTitle"></h3>
+            <div class="theme-swatches" id="theme-swatches" aria-hidden="true"></div>
+            <p class="hint" data-i18n="browserTheme.generateHint"></p>
+            <div class="actions">
+              <button type="button" class="btn btn-primary" id="theme-generate" data-i18n="browserTheme.generate"></button>
+            </div>
+          </div>
+          <div class="card">
+            <h3 data-i18n="browserTheme.bundledTitle"></h3>
+            <div class="actions">
+              <button type="button" class="btn" data-theme-download="noir" data-i18n="browserTheme.downloadNoir"></button>
+              <button type="button" class="btn" data-theme-download="classic" data-i18n="browserTheme.downloadClassic"></button>
+            </div>
+          </div>
+          <div class="card">
+            <h3 data-i18n="browserTheme.installTitle"></h3>
+            <ol class="steps">
+              <li data-i18n="browserTheme.step1"></li>
+              <li data-i18n="browserTheme.step2"></li>
+              <li data-i18n="browserTheme.step3"></li>
+            </ol>
+            <div class="actions">
+              <button type="button" class="btn" id="open-extensions" data-i18n="browserTheme.openExtensions"></button>
+            </div>
+            <p class="hint" id="theme-status" role="status" aria-live="polite"></p>
           </div>
         </section>
 
